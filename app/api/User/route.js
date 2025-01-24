@@ -4,7 +4,6 @@ import { NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
 
-// Create User
 export async function POST(req,res) {
  
     const { userId } = getAuth(req);
@@ -63,6 +62,7 @@ export async function GET(req,res) {
     }
     
     try{
+    
         const user = await prisma.user.findUnique({
             where:{
                 clerkId: userId,
@@ -83,4 +83,3 @@ export async function GET(req,res) {
         return NextResponse.json({ error: 'Internal server error' });
     }
 }
-

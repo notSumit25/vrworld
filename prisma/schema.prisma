@@ -20,6 +20,7 @@ model User {
   clerkId     String   @unique
    rooms      Room[]  @relation("UserRooms")
   ownedRooms  Room[]  @relation("RoomOwner")
+  globalRooms GlobalRoom[] @relation("GlobalRooms")
 }
 
 model Room {
@@ -30,4 +31,13 @@ model Room {
   owner   User   @relation("RoomOwner", fields: [ownerId], references: [id])
   theme   String
   capacity Int
+}
+
+model GlobalRoom{
+  id      Int    @id @default(autoincrement())
+  name    String
+  users   User[] @relation("GlobalRooms")
+  theme   String
+  capacity Int
+  
 }

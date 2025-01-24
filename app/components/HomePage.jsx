@@ -1,38 +1,27 @@
-"use client";
 import Image from "next/image";
-import Canvas from "./components/Canvas";
-import { useAuth } from '@clerk/nextjs';
-import axios from 'axios';
-import { useEffect } from "react";
+import Link from "next/link";
 import { ChevronDown } from "lucide-react";
-import { SignInButton, UserButton } from "@clerk/nextjs";
+import { SignInButton } from "@clerk/nextjs";
 
-export default  function Home() {
-  const { isSignedIn, user } = useAuth();
-  
-  const authenticate = async () => {
-    const response = await axios.post('/api/User');
-    console.log(response.data);
-  };
-  useEffect(() => {
-    if (isSignedIn) {
-      authenticate();
-    }
-  }, [isSignedIn]);
-
-
-
+export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-900 via-blue-600 to-blue-400 text-white px-20">
+    <div className="min-h-screen bg-gradient-to-r from-blue-900 via-blue-600 to-blue-400 text-white">
       {/* Navigation */}
       <nav className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-12"></div>
 
         <div className="flex items-center gap-4">
           <button className="px-6 py-2 text- bg-transparent rounded-full border-2 border-[#00B37D] hover:bg-[#00B37D] hover:text-white transition-colors">
-            Explore Worlds
+            Get started
           </button>
-          <UserButton />
+          <SignInButton>
+            <button
+              className="px-6 py-2 text-[#1f2937] bg-white rounded-full hover:bg-gray-100 transition-colors"
+              
+            >
+              Sign In
+            </button>
+          </SignInButton>
         </div>
       </nav>
 
@@ -49,10 +38,11 @@ export default  function Home() {
             </p>
             <div className="flex items-center gap-4 pt-4">
               <button className="px-6 py-3 bg-[#00B37D] text-white rounded-full hover:bg-[#00A070] transition-colors">
-                Join the Global World
+                Get started
               </button>
+
               <button className="px-6 py-3 text-white flex items-center gap-2 hover:bg-white/10 rounded-full transition-colors">
-                Build your own world 
+                Or take a tour <ChevronDown className="w-5 h-5" />
               </button>
             </div>
           </div>

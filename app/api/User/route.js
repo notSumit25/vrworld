@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
 
+// Create User
 export async function POST(req,res) {
  
     const { userId } = getAuth(req);
@@ -31,7 +32,7 @@ export async function POST(req,res) {
 
         if(findUser)
         {
-            return NextResponse.status(200).json({ user: findUser });
+            return NextResponse.json({ user: findUser });
         }
 
         const newUser = await prisma.user.upsert({
@@ -44,7 +45,7 @@ export async function POST(req,res) {
             },
           });
 
-        return NextResponse.status(200).json({ user: newUser });
+        return NextResponse.json({ user: newUser });
     }
     catch(e)
     {
@@ -53,4 +54,33 @@ export async function POST(req,res) {
     }
 }
     
+// Get User
+
+export async function GET(req,res) {
+    const { userId } = getAuth(req);
+    if (!userId) {
+        return  NextResponse.json({ error: 'User not authenticated' });
+    }
+    
+    try{
+        const user = await prisma.user.findUnique({
+            where:{
+                clerkId: userId,
+            },
+            include:{
+                rooms:true,
+            }
+        });
+        if(!user)
+        {
+            return NextResponse.json({ error: 'User not found' });
+        }
+        return NextResponse.json({ user });
+    }
+    catch(e)
+    {
+        console.log(e);
+        return NextResponse.json({ error: 'Internal server error' });
+    }
+}
 

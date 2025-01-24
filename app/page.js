@@ -12,7 +12,7 @@ export default  function Home() {
   
   const authenticate = async () => {
     const response = await axios.post('/api/User');
-    console.log(response.data);
+    // console.log(response.data);
   };
   useEffect(() => {
     if (isSignedIn) {

@@ -18,13 +18,16 @@ model User {
   name  String
   email String  @unique
   clerkId     String   @unique
-  // rooms Room[]
+   rooms      Room[]  @relation("UserRooms")
+  ownedRooms  Room[]  @relation("RoomOwner")
 }
 
-// model Room{
-//   id Int @id @default(autoincrement())
-//   name String
-//   users User[] 
-//   onwnerId Int
-//   Owner User @relation(fields: [onwnerId], references: [id])
-// }
+model Room {
+  id      Int    @id @default(autoincrement())
+  name    String
+  users   User[] @relation("UserRooms")
+  ownerId Int
+  owner   User   @relation("RoomOwner", fields: [ownerId], references: [id])
+  theme   String
+  capacity Int
+}

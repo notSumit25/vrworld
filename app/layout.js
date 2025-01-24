@@ -9,7 +9,7 @@ import './globals.css'
 export default function RootLayout({
   children,
 }) {
-  console.log(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+
 
   return (
     <ClerkProvider >

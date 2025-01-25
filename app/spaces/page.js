@@ -6,7 +6,6 @@ import { Carousel } from "../components/carousel";
 import { Modal } from "../components/modal";
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
-import Image from "next/image";
 import { CreateSpaceModal } from "../components/Modal2";
 
 const slides = [

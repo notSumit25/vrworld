@@ -31,6 +31,8 @@ model Room {
   owner   User   @relation("RoomOwner", fields: [ownerId], references: [id])
   theme   String
   capacity Int
+  mapId   Int
+  Map     Map   @relation("MapRooms", fields: [mapId], references: [id])
 }
 
 model GlobalRoom{
@@ -40,4 +42,17 @@ model GlobalRoom{
   theme   String
   capacity Int
   
+}
+
+model Map{
+  id      Int    @id @default(autoincrement())
+  name    String
+  image   String
+  rooms   Room[] @relation("MapRooms")
+}
+
+model Avatar{
+  id      Int    @id @default(autoincrement())
+  name    String
+  image   String
 }

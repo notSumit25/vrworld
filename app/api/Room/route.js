@@ -16,7 +16,7 @@ export async function POST(req,res) {
     try{
         const body = await req.json();
         
-        const {name,theme,capacity}=body;
+        const {name,theme,capacity,mapId}=body;
         
         const user= await prisma.user.findUnique({
             where:{
@@ -40,6 +40,17 @@ export async function POST(req,res) {
             return NextResponse.json({ error: 'Room already exists' });
         }
 
+        const map= await prisma.map.findUnique({
+            where:{
+                id:mapId,
+            }
+        });
+
+        if(!map)
+        {
+            return NextResponse.json({ error: 'Map not found' });
+        }
+
        const newRoom= await prisma.room.create({
             data: {
                 name,
@@ -50,6 +61,9 @@ export async function POST(req,res) {
                 },
                 users: {
                     connect: { id: user.id }, 
+                },
+                map:{
+                    connect:{id:mapId},
                 }
             },
         });
@@ -57,6 +71,16 @@ export async function POST(req,res) {
         const updateUser= await prisma.user.update({
             where:{
                 id:user.id,
+            },
+            data:{
+                rooms:{
+                    connect:{id:newRoom.id},
+                }
+            }
+        });
+        const updateMap= await prisma.map.update({
+            where:{
+                id:mapId,
             },
             data:{
                 rooms:{

@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { getAuth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { use } from 'react';
+
 
 const prisma = new PrismaClient();
 

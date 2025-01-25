@@ -8,6 +8,11 @@ import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import { CreateSpaceModal } from "../components/Modal2";
+import { generateReactHelpers } from "@uploadthing/react";
+
+// import { OurFileRouter } from "@/app/api/uploadthing/core";
+
+
 
 const slides = [
   {
@@ -38,7 +43,8 @@ export default function Home() {
   const [isCreateSpaceModalOpen, setIsCreateSpaceModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null)
   const [uploadedImage, setUploadedImage] = useState(null);
-
+  const { useUploadThing } = generateReactHelpers();
+  const { startUpload } = useUploadThing("imageUploader");
   const imageOptions = [
     "/placeholder.svg?height=100&width=100&text=Image1",
     "/placeholder.svg?height=100&width=100&text=Image2",
@@ -46,15 +52,20 @@ export default function Home() {
     "/placeholder.svg?height=100&width=100&text=Image4",
   ];
 
-  const handleImageUpload = (event) => {
+  const handleImageUpload = async(event) => {
     const file = event.target.files?.[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
-      setUploadedImage(imageUrl);
       setSelectedImage(imageUrl);
-    }
-  };
 
+      const uploadedFiles = await startUpload([file]);
+      if (uploadedFiles && uploadedFiles.length > 0) {
+        const uploadedUrl = uploadedFiles[0].url;
+        setUploadedImage(uploadedUrl);
+        console.log("Uploaded image URL:", uploadedUrl);
+      }
+    }
+    };
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="flex items-center justify-between px-6 py-4">
@@ -103,7 +114,7 @@ export default function Home() {
             </button>
           </div>
         </div>
-
+ 
         <Modal
           isOpen={isEnterCodeModalOpen}
           onClose={() => setIsEnterCodeModalOpen(false)}

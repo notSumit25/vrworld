@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { X, Upload } from "lucide-react"
+import { generateReactHelpers } from "@uploadthing/react";
 
 const templateImages = [
   {
@@ -33,6 +34,8 @@ const templateImages = [
 export function CreateSpaceModal({ isOpen, onClose }) {
   const [selectedImage, setSelectedImage] = useState(null)
   const [customImage, setCustomImage] = useState(null)
+  const { useUploadThing } = generateReactHelpers();
+  const { startUpload } = useUploadThing("imageUploader");
   const [formData, setFormData] = useState({
     name: "",
     capacity: "",
@@ -40,7 +43,7 @@ export function CreateSpaceModal({ isOpen, onClose }) {
 
   if (!isOpen) return null
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async(e) => {
     const file = e.target.files?.[0]
     if (file) {
       const reader = new FileReader()
@@ -49,7 +52,14 @@ export function CreateSpaceModal({ isOpen, onClose }) {
         setSelectedImage(reader.result)
       }
       reader.readAsDataURL(file)
+
+      const uploadedFiles = await startUpload([file]);
+      if (uploadedFiles && uploadedFiles.length > 0) {
+        const uploadedUrl = uploadedFiles[0].url;
+        setCustomImage(uploadedUrl);
+      }
     }
+    
   }
 
   const handleSubmit = (e) => {

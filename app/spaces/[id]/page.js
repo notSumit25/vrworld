@@ -26,7 +26,7 @@ export default function Page() {
       console.log("Updating users", users);
       setUsers(users);
     });
-  }, [user, direction]);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -102,23 +102,27 @@ export default function Page() {
     };
 
     spriteImg.onload = handleSpriteLoad;
-    socket.emit("updateAttributes", id, user);
+    // Remove the initial emit of updateAttributes
+    // socket.emit("updateAttributes", id, user);
   }, [user, direction, users]);
 
   const handleKeyDown = (e) => {
     const key = e.key;
+    let newUser = { ...user };
     if (key === "w" || key === "ArrowUp") {
-      setDirection("up");
-      setUser((prev) => ({ ...prev, y: prev.y - 20, direction: "up" }));
+      newUser = { ...newUser, y: newUser.y - 20, direction: "up" };
     } else if (key === "s" || key === "ArrowDown") {
-      setDirection("down");
-      setUser((prev) => ({ ...prev, y: prev.y + 20, direction: "down" }));
+      newUser = { ...newUser, y: newUser.y + 20, direction: "down" };
     } else if (key === "a" || key === "ArrowLeft") {
-      setDirection("left");
-      setUser((prev) => ({ ...prev, x: prev.x - 20, direction: "left" }));
+      newUser = { ...newUser, x: newUser.x - 20, direction: "left" };
     } else if (key === "d" || key === "ArrowRight") {
-      setDirection("right");
-      setUser((prev) => ({ ...prev, x: prev.x + 20, direction: "right" }));
+      newUser = { ...newUser, x: newUser.x + 20, direction: "right" };
+    }
+
+    if (newUser.x !== user.x || newUser.y !== user.y || newUser.direction !== user.direction) {
+      setDirection(newUser.direction);
+      setUser(newUser);
+      socket.emit("updateAttributes", id, newUser);
     }
   };
 
@@ -127,7 +131,7 @@ export default function Page() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-gray-50 w-full">

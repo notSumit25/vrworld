@@ -13,8 +13,6 @@ import { useRouter } from "next/navigation";
 
 // import { OurFileRouter } from "@/app/api/uploadthing/core";
 
-
-
 const slides = [
   {
     title: "ZEP Boxing",
@@ -43,7 +41,7 @@ export default function Home() {
   const [isEnterCodeModalOpen, setIsEnterCodeModalOpen] = useState(false);
   const [isSetAvatarModalOpen, setIsSetAvatarModalOpen] = useState(false);
   const [isCreateSpaceModalOpen, setIsCreateSpaceModalOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null)
+  const [selectedImage, setSelectedImage] = useState(null);
   const [uploadedImage, setUploadedImage] = useState(null);
   const { useUploadThing } = generateReactHelpers();
   const { startUpload } = useUploadThing("imageUploader");
@@ -81,7 +79,11 @@ export default function Home() {
     console.log(response.data.avatars);
   }
 
-  const fetchRooms = async() => {
+  useEffect(() => {
+    fetchRooms();
+  }, []);
+
+  const fetchRooms = async () => {
     const response = await axios.get("/api/Room");
     console.log(response.data);
     setRooms(response.data.rooms);
@@ -117,7 +119,9 @@ export default function Home() {
         console.log("Uploaded image URL:", uploadedUrl);
       }
     }
-    };
+  };
+
+
 
     const joinRoom = async() => {
       console.log(roomId);
@@ -148,8 +152,24 @@ export default function Home() {
 
         <div className="mt-8 flex items-center justify-between">
           <div className="flex gap-4">
-            <button className={ recent ? `font-medium text-gray-900` : "text-gray-500 hover:text-gray-700"} onClick={()=> setRecent(true)}>Recent</button>
-            <button className={ !recent ? `font-medium text-gray-900` : "text-gray-500 hover:text-gray-700"}onClick={()=>setRecent(false)}>
+            <button
+              className={
+                recent
+                  ? `font-medium text-gray-900`
+                  : "text-gray-500 hover:text-gray-700"
+              }
+              onClick={() => setRecent(true)}
+            >
+              Recent
+            </button>
+            <button
+              className={
+                !recent
+                  ? `font-medium text-gray-900`
+                  : "text-gray-500 hover:text-gray-700"
+              }
+              onClick={() => setRecent(false)}
+            >
               My Spaces
             </button>
           </div>
@@ -177,7 +197,7 @@ export default function Home() {
             </button>
           </div>
         </div>
- 
+
         <Modal
           isOpen={isEnterCodeModalOpen}
           onClose={() => setIsEnterCodeModalOpen(false)}
@@ -190,7 +210,10 @@ export default function Home() {
             placeholder="Enter space code"
             className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
           />
-          <button onClick={joinRoom} className="mt-4 w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium">
+          <button
+            onClick={joinRoom}
+            className="mt-4 w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium"
+          >
             Enter Space
           </button>
         </Modal>

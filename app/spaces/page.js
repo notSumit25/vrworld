@@ -1,43 +1,69 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Search } from "lucide-react"
-import { Carousel } from "../components/carousel"
-import { Modal } from "../components/modal"
-import Link from "next/link"
-import { UserButton } from "@clerk/nextjs"
+import { useState } from "react";
+import { Search } from "lucide-react";
+import { Carousel } from "../components/carousel";
+import { Modal } from "../components/modal";
+import Link from "next/link";
+import { UserButton } from "@clerk/nextjs";
+import Image from "next/image";
+import { CreateSpaceModal } from "../components/Modal2";
 
 const slides = [
   {
     title: "ZEP Boxing",
     description: "Defeat other players and become the champion!",
-    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-MIIRKzcy4QnfPXa4MC0c1qDhzY178Y.png",
+    image:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-MIIRKzcy4QnfPXa4MC0c1qDhzY178Y.png",
     tags: ["Official", "Game"],
   },
   {
     title: "ZEP Study room",
     description: "Study alone or with friends in our new study room!",
-    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-MIIRKzcy4QnfPXa4MC0c1qDhzY178Y.png",
+    image:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-MIIRKzcy4QnfPXa4MC0c1qDhzY178Y.png",
     tags: ["Official", "Gathering"],
   },
   {
     title: "Bonbon School Detectives",
     description: "Uncover the truth behind the missing students",
-    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-MIIRKzcy4QnfPXa4MC0c1qDhzY178Y.png",
+    image:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-MIIRKzcy4QnfPXa4MC0c1qDhzY178Y.png",
     tags: ["Official", "Game"],
   },
-]
+];
 
 export default function Home() {
-  const [isEnterCodeModalOpen, setIsEnterCodeModalOpen] = useState(false)
-  const [isCreateSpaceModalOpen, setIsCreateSpaceModalOpen] = useState(false)
+  const [isEnterCodeModalOpen, setIsEnterCodeModalOpen] = useState(false);
+  const [isCreateSpaceModalOpen, setIsCreateSpaceModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null)
+  const [uploadedImage, setUploadedImage] = useState(null);
+
+  const imageOptions = [
+    "/placeholder.svg?height=100&width=100&text=Image1",
+    "/placeholder.svg?height=100&width=100&text=Image2",
+    "/placeholder.svg?height=100&width=100&text=Image3",
+    "/placeholder.svg?height=100&width=100&text=Image4",
+  ];
+
+  const handleImageUpload = (event) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setUploadedImage(imageUrl);
+      setSelectedImage(imageUrl);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
-        <nav className="flex items-center justify-between px-6 py-4">
+      <nav className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-12"></div>
         <div className="flex items-center gap-4">
-          <Link href={'/spaces'} className="px-6 py-2 text- bg-transparent rounded-full border-2 border-[#00B37D] hover:bg-[#00B37D] hover:text-white transition-colors">
+          <Link
+            href={"/spaces"}
+            className="px-6 py-2 text- bg-transparent rounded-full border-2 border-[#00B37D] hover:bg-[#00B37D] hover:text-white transition-colors"
+          >
             Explore Worlds
           </Link>
           <UserButton />
@@ -49,7 +75,9 @@ export default function Home() {
         <div className="mt-8 flex items-center justify-between">
           <div className="flex gap-4">
             <button className="font-medium text-gray-900">Recent</button>
-            <button className="text-gray-500 hover:text-gray-700">My Spaces</button>
+            <button className="text-gray-500 hover:text-gray-700">
+              My Spaces
+            </button>
           </div>
 
           <div className="flex items-center gap-4">
@@ -76,7 +104,11 @@ export default function Home() {
           </div>
         </div>
 
-        <Modal isOpen={isEnterCodeModalOpen} onClose={() => setIsEnterCodeModalOpen(false)} title="Enter with Code">
+        <Modal
+          isOpen={isEnterCodeModalOpen}
+          onClose={() => setIsEnterCodeModalOpen(false)}
+          title="Enter with Code"
+        >
           <input
             type="text"
             placeholder="Enter space code"
@@ -86,31 +118,8 @@ export default function Home() {
             Enter Space
           </button>
         </Modal>
-
-        <Modal
-          isOpen={isCreateSpaceModalOpen}
-          onClose={() => setIsCreateSpaceModalOpen(false)}
-          title="Create New Space"
-        >
-          <div className="space-y-4">
-            <input
-              type="text"
-              placeholder="Space name"
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            />
-            <select className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-              <option>Select template</option>
-              <option>Empty Space</option>
-              <option>Game Template</option>
-              <option>Meeting Room</option>
-            </select>
-            <button className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium">
-              Create Space
-            </button>
-          </div>
-        </Modal>
+        <CreateSpaceModal isOpen={isCreateSpaceModalOpen} onClose={() => setIsCreateSpaceModalOpen(false)} />
       </main>
     </div>
-  )
+  );
 }
-

@@ -12,7 +12,7 @@ export async function POST(req,res) {
     try{
         const body = await req.json();
         
-        const {name,image}=body;
+        const {name,image,spiritImage}=body;
 
         const findAvatar= await prisma.avatar.findFirst({
             where:{
@@ -29,6 +29,7 @@ export async function POST(req,res) {
             data: {
                 name,
                 image,
+                spiritImage,
             },
         });
 
@@ -107,7 +108,7 @@ export async function PUT(req,res) {
     
         try{
             const body = await req.json();
-            const {id,name,image}=body;
+            const {id,name,image,spiritImage}=body;
             const avatar= await prisma.avatar.update({
                 where:{
                     id:Number(id),
@@ -115,6 +116,7 @@ export async function PUT(req,res) {
                 data:{
                     name,
                     image,
+                    spiritImage
                 }
             });
             return NextResponse.json({msg:'Avatar updated successfully',avatar});

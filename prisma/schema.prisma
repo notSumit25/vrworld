@@ -53,4 +53,5 @@ model Avatar{
   id      Int    @id @default(autoincrement())
   name    String
   image   String
+  spiritImage String
 }

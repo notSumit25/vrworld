@@ -1,72 +1,89 @@
 'use client'
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef, useState } from 'react';
 
-export default function page() {
-    const ref = React.useRef(null)
-    const [user, setUser] = React.useState({x: 50, y: 50});
-    useEffect(() => {
-        const canvas = ref.current
-        const ctx = canvas.getContext('2d')
-        canvas.width = window.innerWidth
-        canvas.height = window.innerHeight
-        const img = new Image()
-        img.src = '/background.webp'
-        img.onload = () => {
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-        }
-
-        const drawUser = () => {
-            if(user && user.x && user.y){
-                const userImg = new Image()
-                userImg.src = '/player.png'
-                userImg.onload = () => {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height)
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-                    ctx.drawImage(userImg, user.x, user.y, 50, 50)
-                }
-            }
-        }
-
-        drawUser()
-
-    }, [])
+export default function Page() {
+    const canvasRef = useRef(null);
+    const [user, setUser] = useState({ x: 50, y: 50 });
+    const [direction, setDirection] = useState('down'); // 'down', 'left', 'right', 'up'
 
     useEffect(() => {
-        const canvas = ref.current
-        const ctx = canvas.getContext('2d')
-        const img = new Image()
-        img.src = '/background.webp'
-        const userImg = new Image()
-        userImg.src = '/player.png'
-        userImg.onload = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height)
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-            ctx.drawImage(userImg, user.x, user.y, 50, 50)
-        }
-    }, [user])
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-    const handle = (e) => {
-        if(!user) return;
+        const backgroundImg = new Image();
+        backgroundImg.src = '/background.webp';
+
+        const spriteImg = new Image();
+        spriteImg.src = '/sprite.png';
+
+        const frameCount = 4; // Number of frames per row in the sprite sheet
+        const spriteWidth = spriteImg.width / frameCount;
+        const spriteHeight = spriteImg.height / 4; // Assuming 4 rows for directions
+
+        const draw = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw the background
+            ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
+
+            // Determine the row based on direction
+            const directionRow = direction === 'down' ? 0
+                : direction === 'left' ? 1
+                : direction === 'right' ? 2
+                : 3; // 'up'
+
+            // Draw the sprite (always first frame of the respective row)
+            ctx.drawImage(
+                spriteImg,
+                0, // Always the first frame (x = 0)
+                directionRow * spriteHeight, // Source y position
+                spriteWidth, // Source width
+                spriteHeight, // Source height
+                user.x, // Destination x position
+                user.y, // Destination y position
+                50, // Destination width
+                50 // Destination height
+            );
+
+            requestAnimationFrame(draw);
+        };
+
+        const handleSpriteLoad = () => {
+            draw();
+        };
+
+        spriteImg.onload = handleSpriteLoad;
+    }, [user, direction]);
+
+    const handleKeyDown = (e) => {
         const key = e.key;
-        //use WASD
-        if(key === "w" || key === "ArrowUp"){
-          setUser({...user, y: user.y - 20});
-        } else if(key === "s" || key === "ArrowDown"){
-          setUser({...user, y: user.y + 20});
-        } else if(key === "a" || key === "ArrowLeft"){
-          setUser({...user, x: user.x - 20});
-        } else if(key === "d" || key === "ArrowRight"){
-          setUser({...user, x: user.x + 20});
+        if (key === 'w' || key === 'ArrowUp') {
+            setDirection('up');
+            setUser((prev) => ({ ...prev, y: prev.y - 20 }));
+        } else if (key === 's' || key === 'ArrowDown') {
+            setDirection('down');
+            setUser((prev) => ({ ...prev, y: prev.y + 20 }));
+        } else if (key === 'a' || key === 'ArrowLeft') {
+            setDirection('left');
+            setUser((prev) => ({ ...prev, x: prev.x - 20 }));
+        } else if (key === 'd' || key === 'ArrowRight') {
+            setDirection('right');
+            setUser((prev) => ({ ...prev, x: prev.x + 20 }));
         }
-      }
-    
-      useEffect(() => {
-        window.addEventListener("keydown", handle);
-        return () => window.removeEventListener("keydown", handle);
-      }, [user]);
-  return (
-    <div className='min-h-screen bg-gray-50 w-full'>
-      <canvas ref={ref} className='w-full h-full' id='canvas'></canvas>
-    </div>
-  )
+    };
+
+    useEffect(() => {
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
+
+    return (
+        <div className='min-h-screen bg-gray-50 w-full'>
+            <canvas ref={canvasRef} className='w-full h-full' id='canvas'></canvas>
+        </div>
+    );
 }

@@ -1,30 +1,32 @@
 "use client"
-
 import { useState } from "react"
 import { X, Upload } from "lucide-react"
+import { generateReactHelpers } from "@uploadthing/react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const templateImages = [
   {
     id: 1,
-    src: "/placeholder.svg?height=200&width=200",
+    src: "https://6zbrwlnqfb.ufs.sh/f/ZiOcTFqmdHkJVtSINJbUFRyn97d6iOMz8wlAm1eTo5YLfIHk",
     alt: "Empty Space Template",
     title: "Empty Space",
   },
   {
     id: 2,
-    src: "/placeholder.svg?height=200&width=200",
+    src: "https://6zbrwlnqfb.ufs.sh/f/ZiOcTFqmdHkJIgw8OVOHzlXoRr38J4TusMLwKjPZgxyd1Y9D",
     alt: "Game Room Template",
     title: "Game Room",
   },
   {
     id: 3,
-    src: "/placeholder.svg?height=200&width=200",
+    src: "https://6zbrwlnqfb.ufs.sh/f/ZiOcTFqmdHkJCq1teNUdqDGhvWa1jib2LToVz8PrO4QuMen9",
     alt: "Meeting Room Template",
     title: "Meeting Room",
   },
   {
     id: 4,
-    src: "/placeholder.svg?height=200&width=200",
+    src: "https://6zbrwlnqfb.ufs.sh/f/ZiOcTFqmdHkJCQDXzRdqDGhvWa1jib2LToVz8PrO4QuMen93",
     alt: "Study Room Template",
     title: "Study Room",
   },
@@ -33,32 +35,45 @@ const templateImages = [
 export function CreateSpaceModal({ isOpen, onClose }) {
   const [selectedImage, setSelectedImage] = useState(null)
   const [customImage, setCustomImage] = useState(null)
+  const { useUploadThing } = generateReactHelpers();
+  const { startUpload } = useUploadThing("imageUploader");
   const [formData, setFormData] = useState({
     name: "",
     capacity: "",
   })
+  const router = useRouter();
 
   if (!isOpen) return null
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async(e) => {
     const file = e.target.files?.[0]
     if (file) {
       const reader = new FileReader()
       reader.onloadend = () => {
-        setCustomImage(reader.result)
         setSelectedImage(reader.result)
       }
       reader.readAsDataURL(file)
-    }
-  }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // Handle form submission
-    console.log({
+      const uploadedFiles = await startUpload([file]);
+      if (uploadedFiles && uploadedFiles.length > 0) {
+        const uploadedUrl = uploadedFiles[0].url;
+        setCustomImage(uploadedUrl);
+      }
+    }
+    }
+  
+  const handleSubmit = async(e) => {
+    e.preventDefault();
+   
+    const data={
       ...formData,
-      image: selectedImage,
-    })
+      image: customImage,
+    };
+
+
+    const response =await axios.post("/api/Room", data);
+    const roomId=response.data.room.id;
+    router.push(`/spaces/${roomId}`); 
   }
 
   return (
@@ -124,7 +139,7 @@ export function CreateSpaceModal({ isOpen, onClose }) {
                   <button
                     key={image.id}
                     type="button"
-                    onClick={() => setSelectedImage(image.src)}
+                    onClick={() => {setSelectedImage(image.src),setCustomImage(image.src)}}
                     className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
                       selectedImage === image.src
                         ? "border-purple-500 ring-2 ring-purple-500"
@@ -168,9 +183,9 @@ export function CreateSpaceModal({ isOpen, onClose }) {
             >
               Cancel
             </button>
-            <button type="submit" className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+            {customImage &&<button type="submit" className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
               Create Space
-            </button>
+            </button>}
           </div>
         </form>
       </div>

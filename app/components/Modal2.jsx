@@ -32,7 +32,7 @@ const templateImages = [
   },
 ]
 
-export function CreateSpaceModal({ isOpen, onClose }) {
+export function CreateSpaceModal({ isOpen, onClose , avatarId}) {
   const [selectedImage, setSelectedImage] = useState(null)
   const [customImage, setCustomImage] = useState(null)
   const { useUploadThing } = generateReactHelpers();
@@ -42,7 +42,7 @@ export function CreateSpaceModal({ isOpen, onClose }) {
     capacity: "",
   })
   const router = useRouter();
-
+  console.log(avatarId);
   if (!isOpen) return null
 
   const handleImageUpload = async(e) => {
@@ -64,16 +64,16 @@ export function CreateSpaceModal({ isOpen, onClose }) {
   
   const handleSubmit = async(e) => {
     e.preventDefault();
-   
+
     const data={
       ...formData,
       image: customImage,
+      avatarId: Number(avatarId)
     };
-
-
     const response =await axios.post("/api/Room", data);
     const roomId=response.data.room.id;
     router.push(`/spaces/${roomId}`); 
+  
   }
 
   return (

@@ -9,6 +9,7 @@ import { UserButton } from "@clerk/nextjs";
 import { CreateSpaceModal } from "../components/Modal2";
 import axios from "axios";
 import { generateReactHelpers } from "@uploadthing/react";
+import { useRouter } from "next/navigation";
 
 // import { OurFileRouter } from "@/app/api/uploadthing/core";
 
@@ -40,6 +41,7 @@ const slides = [
 
 export default function Home() {
   const [isEnterCodeModalOpen, setIsEnterCodeModalOpen] = useState(false);
+  const [isSetAvatarModalOpen, setIsSetAvatarModalOpen] = useState(false);
   const [isCreateSpaceModalOpen, setIsCreateSpaceModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null)
   const [uploadedImage, setUploadedImage] = useState(null);
@@ -49,6 +51,14 @@ export default function Home() {
   const [rooms,setRooms]=useState([]);
   const [userrooms,setUserRooms]=useState([]);
   const [recent ,setRecent]=useState(true);
+  const [avatars, setAvatars] = useState([]);
+  const [Avatar,setAvatar]=useState({
+    id:null,
+    name: "",
+    image: "",
+    spiritImage: "",
+  });
+  const router=useRouter();
 
   const imageOptions = [
     "/placeholder.svg?height=100&width=100&text=Image1",
@@ -56,11 +66,20 @@ export default function Home() {
     "/placeholder.svg?height=100&width=100&text=Image3",
     "/placeholder.svg?height=100&width=100&text=Image4",
   ];
+
+
   
   useEffect(()=>{
      fetchRooms();
+     fetchAvatar();
   ;
   },[])
+  
+  const  fetchAvatar = async() => {
+    const response = await axios.get("/api/Avatar");
+    setAvatars(response.data.avatars);
+    console.log(response.data.avatars);
+  }
 
   const fetchRooms = async() => {
     const response = await axios.get("/api/Room");
@@ -68,7 +87,22 @@ export default function Home() {
     setRooms(response.data.rooms);
     setUserRooms(response.data.userrooms);
   }
+ 
+  const handleClick = (roomId) => {
+    setroomId(roomId);
+    setIsSetAvatarModalOpen(true);
+    
+    
+  }
 
+  const handleCreateRoom = () => {
+    if(!Avatar.id)
+    {
+      setIsSetAvatarModalOpen(true);
+    }
+
+    setIsCreateSpaceModalOpen(true);
+  }
 
   const handleImageUpload = async(event) => {
     const file = event.target.files?.[0];
@@ -86,8 +120,13 @@ export default function Home() {
     };
 
     const joinRoom = async() => {
-      const response = await axios.put("/api/Room", {roomId});
-    
+      console.log(roomId);
+      const response = await axios.put("/api/Room", {roomId, avatarId: Avatar.id});
+      const {msg}=response.data;
+      if(msg === 'room is not full')
+      {
+        router.push(`/spaces/${roomId}`);
+      }
     }
       
   return (
@@ -131,7 +170,7 @@ export default function Home() {
               Enter with Code
             </button>
             <button
-              onClick={() => setIsCreateSpaceModalOpen(true)}
+              onClick={handleCreateRoom}
               className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium"
             >
               Create Space
@@ -155,11 +194,43 @@ export default function Home() {
             Enter Space
           </button>
         </Modal>
-        <CreateSpaceModal isOpen={isCreateSpaceModalOpen} onClose={() => setIsCreateSpaceModalOpen(false)} />
+
+        <Modal
+          isOpen={isSetAvatarModalOpen}
+          onClose={() => setIsSetAvatarModalOpen(false)}
+          title="Set Your Avatar"
+        >
+            <div className="flex-col gap-4">
+              <div>
+              {avatars.map((ele) => (
+                  <button
+                    key={ele.id}
+                    type="button"
+                    onClick={() => {setAvatar(ele)}}
+                    className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                      Avatar.image === ele.image
+                        ? "border-purple-500 ring-2 ring-purple-500"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    <img src={ele.image || "/placeholder.svg"} alt="avatar" className="w-full h-full object-cover" />
+                    <div className="absolute inset-x-0 bottom-0 bg-black/50 p-2">
+                      <p className="text-white text-sm text-center">{ele.name}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+             
+                {Avatar.id && <button className="bg-slate-400 border-black" onClick={joinRoom}> JOIN ROOM</button>}
+              </div>
+        </Modal>
+
+      {Avatar.id &&  <CreateSpaceModal isOpen={isCreateSpaceModalOpen} onClose={() => setIsCreateSpaceModalOpen(false)} avatarId={Avatar.id}  />}
           {recent &&rooms.map((ele) => (
                   <button
                     key={ele.id}
                     type="button"
+                    onClick={(e) => {handleClick(ele.id)}}
                     className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all border-gray-200 hover:border-gray-300`}
                   >
                     <img src={ele.Map.image } alt="roomsInage" className="w-full h-full object-cover" />
@@ -172,6 +243,7 @@ export default function Home() {
                   <button
                     key={ele.id}
                     type="button"
+                    onClick={(e) => {handleClick(ele.id)}}
                     className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all border-gray-200 hover:border-gray-300`}
                   >
                     <img src={ele.Map.image } alt="roomsInage" className="w-full h-full object-cover" />

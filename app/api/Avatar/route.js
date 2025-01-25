@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 //Create a Avtar
 export async function POST(req,res) {
  
-    
+    console.log('Avatar');
     try{
         const body = await req.json();
         
@@ -51,7 +51,7 @@ export async function GET(req,res) {
     
         try{
             const avatars= await prisma.avatar.findMany();
-            return NextResponse.json({avatars});
+            return NextResponse.json({avatars:avatars});
         }
         catch(e)
         {

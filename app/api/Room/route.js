@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { getAuth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { use } from 'react';
+import { connect } from 'http2';
 
 const prisma = new PrismaClient();
 
@@ -15,8 +16,8 @@ export async function POST(req,res) {
     
     try{
         const body = await req.json();
-        
-        const {name,capacity,image}=body;
+        console.log(body);
+        const {name,capacity,image , avatarId }=body;
         
         const user= await prisma.user.findUnique({
             where:{
@@ -29,16 +30,7 @@ export async function POST(req,res) {
             return NextResponse.json({ error: 'User not found' });
         }
 
-        const findRoom= await prisma.room.findFirst({
-            where:{
-                name,
-            }
-        });
-
-        if(findRoom)
-        {
-            return NextResponse.json({ error: 'Room already exists' });
-        }
+        
         
         const findMap= await prisma.map.findFirst({
             where:{
@@ -61,12 +53,12 @@ export async function POST(req,res) {
         }else {
             mapId=findMap.id;
         }
-    
-
-       const newRoom= await prisma.room.create({
+        console.log(name,capacity,avatarId,user.id,mapId);
+         const cap=Number(capacity);
+       const newRoom = await prisma.room.create({
             data: {
                 name,
-                capacity:Number(capacity),
+                capacity:cap,
                 owner: {
                     connect: { id: user.id },
                 },
@@ -75,10 +67,14 @@ export async function POST(req,res) {
                 },
                 Map:{
                     connect:{id:mapId},
-                }
-
-            },
+                },
+                Avatars:[{
+                    avatar:avatarId,
+                    user: user.id,
+                }]
+            }
         });
+       
 
         const updateUser= await prisma.user.update({
             where:{
@@ -153,9 +149,11 @@ export async function GET(req) {
                 },
                 include:{
                     users:true,
-                    Map:true
+                    Map:true,
+                 
                 }
             });
+         
             return NextResponse.json({rooms:rooms,userrooms:userrooms});
     
         }
@@ -178,7 +176,7 @@ export async function PUT(req,res) {
         try{
             const body = await req.json();
             
-            const {roomId}=body;
+            const {roomId,avatarId}=body;
             
             const user= await prisma.user.findUnique({
                 where:{
@@ -190,10 +188,14 @@ export async function PUT(req,res) {
             {
                 return NextResponse.json({ error: 'User not found' });
             }
+          
     
             const room= await prisma.room.findUnique({
                 where:{
                     id:roomId,
+                },
+                include:{
+                    users:true,
                 }
             });
     
@@ -201,7 +203,18 @@ export async function PUT(req,res) {
             {
                 return NextResponse.json({ error: 'Room not found' });
             }
-    
+          
+            if(room.capacity<=room.users.length)
+            {
+                return NextResponse.json({ msg: 'Room is full' });
+            }
+
+            const avatar= await prisma.avatar.findUnique({
+                where:{
+                    id:Number(avatarId),
+                }
+            });
+
             const findUser= await prisma.room.findFirst({
                 where:{
                     id:roomId,
@@ -215,7 +228,7 @@ export async function PUT(req,res) {
     
             if(findUser)
             {
-                return NextResponse.json({ error: 'User already in room' });
+                return NextResponse.json({ msg: 'User already in room' });
             }
     
              const updatedRoom= await prisma.room.update({
@@ -225,7 +238,11 @@ export async function PUT(req,res) {
                 data:{
                     users:{
                         connect:{id:user.id},
-                    }
+                    },
+                    Avatars:[{
+                        avatar:avatarId,
+                        user: user.id,
+                    }]
                 }
             });
 
@@ -240,7 +257,7 @@ export async function PUT(req,res) {
                 }
             });
         
-            return NextResponse.json({msg:updatedRoom});
+            return NextResponse.json({msg:"room is not full", room :updatedRoom});
     
         }
         catch(e)

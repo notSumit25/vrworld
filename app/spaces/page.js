@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { Carousel } from "../components/carousel";
 import { Modal } from "../components/modal";
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import { CreateSpaceModal } from "../components/Modal2";
+import axios from "axios";
 import { generateReactHelpers } from "@uploadthing/react";
 
 // import { OurFileRouter } from "@/app/api/uploadthing/core";
@@ -44,12 +45,26 @@ export default function Home() {
   const [uploadedImage, setUploadedImage] = useState(null);
   const { useUploadThing } = generateReactHelpers();
   const { startUpload } = useUploadThing("imageUploader");
+  const [roomId,setroomId]=useState(null);
+  const [rooms,setRooms]=useState([]);
+
   const imageOptions = [
     "/placeholder.svg?height=100&width=100&text=Image1",
     "/placeholder.svg?height=100&width=100&text=Image2",
     "/placeholder.svg?height=100&width=100&text=Image3",
     "/placeholder.svg?height=100&width=100&text=Image4",
   ];
+  
+  useEffect(()=>{
+     fetchRooms();
+  },[])
+
+  const fetchRooms = async() => {
+    const response = await axios.get("/api/Room");
+    // console.log(response.data.rooms);
+    setRooms(response.data.rooms);
+  }
+
 
   const handleImageUpload = async(event) => {
     const file = event.target.files?.[0];
@@ -65,6 +80,12 @@ export default function Home() {
       }
     }
     };
+
+    const joinRoom = async() => {
+      const response = await axios.put("/api/Room", {roomId});
+      console.log(response.data);
+    }
+      
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="flex items-center justify-between px-6 py-4">
@@ -121,14 +142,28 @@ export default function Home() {
         >
           <input
             type="text"
+            value={roomId}
+            onChange={(e) => setroomId(e.target.value)}
             placeholder="Enter space code"
             className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
           />
-          <button className="mt-4 w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium">
+          <button onClick={joinRoom} className="mt-4 w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium">
             Enter Space
           </button>
         </Modal>
         <CreateSpaceModal isOpen={isCreateSpaceModalOpen} onClose={() => setIsCreateSpaceModalOpen(false)} />
+        {rooms.map((ele) => (
+                  <button
+                    key={ele.id}
+                    type="button"
+                    className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all border-gray-200 hover:border-gray-300`}
+                  >
+                    <img src={ele.Map.image } alt="roomsInage" className="w-full h-full object-cover" />
+                    <div className="absolute inset-x-0 bottom-0 bg-black/50 p-2">
+                      <p className="text-white text-sm text-center">{ele.name}</p>
+                    </div>
+                  </button>
+                ))}
       </main>
     </div>
   );

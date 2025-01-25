@@ -24,22 +24,20 @@ model User {
 }
 
 model Room {
-  id      Int    @id @default(autoincrement())
+  id      String @id @default(uuid()) @db.Uuid
   name    String
   users   User[] @relation("UserRooms")
   ownerId Int
   owner   User   @relation("RoomOwner", fields: [ownerId], references: [id])
-  theme   String
   capacity Int
   mapId   Int
   Map     Map   @relation("MapRooms", fields: [mapId], references: [id])
 }
 
 model GlobalRoom{
-  id      Int    @id @default(autoincrement())
+  id      String @id @default(uuid()) @db.Uuid
   name    String
   users   User[] @relation("GlobalRooms")
-  theme   String
   capacity Int
   
 }

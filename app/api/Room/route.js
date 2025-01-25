@@ -16,7 +16,7 @@ export async function POST(req,res) {
     try{
         const body = await req.json();
         
-        const {name,theme,capacity,mapId}=body;
+        const {name,capacity,image}=body;
         
         const user= await prisma.user.findUnique({
             where:{
@@ -39,32 +39,44 @@ export async function POST(req,res) {
         {
             return NextResponse.json({ error: 'Room already exists' });
         }
-
-        const map= await prisma.map.findUnique({
+        
+        const findMap= await prisma.map.findFirst({
             where:{
-                id:mapId,
+                image:image,
             }
         });
 
-        if(!map)
-        {
-            return NextResponse.json({ error: 'Map not found' });
+        let mapId=null;
+          
+        if(!findMap){
+        const newmap= await prisma.map.create({
+            data:{
+                name,
+                image,
+                rooms:{}
+            }
+        });
+
+        mapId=newmap.id;
+        }else {
+            mapId=findMap.id;
         }
+    
 
        const newRoom= await prisma.room.create({
             data: {
                 name,
-                theme,
-                capacity,
+                capacity:Number(capacity),
                 owner: {
                     connect: { id: user.id },
                 },
                 users: {
                     connect: { id: user.id }, 
                 },
-                map:{
+                Map:{
                     connect:{id:mapId},
                 }
+
             },
         });
 
@@ -89,7 +101,7 @@ export async function POST(req,res) {
             }
         });
       
-        return NextResponse.json({msg:newRoom});
+        return NextResponse.json({msg :"new room created",room:newRoom});
 
     }
     catch(e)
@@ -107,7 +119,7 @@ export async function GET(req) {
         if (!userId) {
             return  NextResponse.json({ error: 'User not authenticated' });
         }
-        
+     
         try{
           
             const user= await prisma.user.findUnique({
@@ -123,14 +135,19 @@ export async function GET(req) {
     
             const rooms= await prisma.room.findMany({
                 where:{
-                    ownerId:user.id,
+                    users:{
+                        some:{
+                            id:user.id,
+                        }
+                    }
                 },
                 include:{
                     users:true,
+                    Map:true
                 }
             });
     
-            return NextResponse.json({msg:rooms});
+            return NextResponse.json({rooms:rooms});
     
         }
         catch(e)

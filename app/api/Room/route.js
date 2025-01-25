@@ -132,7 +132,7 @@ export async function GET(req) {
             {
                 return NextResponse.json({ error: 'User not found' });
             }
-    
+             
             const rooms= await prisma.room.findMany({
                 where:{
                     users:{
@@ -146,8 +146,17 @@ export async function GET(req) {
                     Map:true
                 }
             });
-    
-            return NextResponse.json({rooms:rooms});
+            
+            const userrooms= await prisma.room.findMany({
+                where:{
+                    ownerId:user.id,
+                },
+                include:{
+                    users:true,
+                    Map:true
+                }
+            });
+            return NextResponse.json({rooms:rooms,userrooms:userrooms});
     
         }
         catch(e)

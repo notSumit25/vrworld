@@ -47,6 +47,8 @@ export default function Home() {
   const { startUpload } = useUploadThing("imageUploader");
   const [roomId,setroomId]=useState(null);
   const [rooms,setRooms]=useState([]);
+  const [userrooms,setUserRooms]=useState([]);
+  const [recent ,setRecent]=useState(true);
 
   const imageOptions = [
     "/placeholder.svg?height=100&width=100&text=Image1",
@@ -57,12 +59,14 @@ export default function Home() {
   
   useEffect(()=>{
      fetchRooms();
+  ;
   },[])
 
   const fetchRooms = async() => {
     const response = await axios.get("/api/Room");
-    // console.log(response.data.rooms);
+    console.log(response.data);
     setRooms(response.data.rooms);
+    setUserRooms(response.data.userrooms);
   }
 
 
@@ -83,7 +87,7 @@ export default function Home() {
 
     const joinRoom = async() => {
       const response = await axios.put("/api/Room", {roomId});
-      console.log(response.data);
+    
     }
       
   return (
@@ -105,8 +109,8 @@ export default function Home() {
 
         <div className="mt-8 flex items-center justify-between">
           <div className="flex gap-4">
-            <button className="font-medium text-gray-900">Recent</button>
-            <button className="text-gray-500 hover:text-gray-700">
+            <button className={ recent ? `font-medium text-gray-900` : "text-gray-500 hover:text-gray-700"} onClick={()=> setRecent(true)}>Recent</button>
+            <button className={ !recent ? `font-medium text-gray-900` : "text-gray-500 hover:text-gray-700"}onClick={()=>setRecent(false)}>
               My Spaces
             </button>
           </div>
@@ -152,7 +156,19 @@ export default function Home() {
           </button>
         </Modal>
         <CreateSpaceModal isOpen={isCreateSpaceModalOpen} onClose={() => setIsCreateSpaceModalOpen(false)} />
-        {rooms.map((ele) => (
+          {recent &&rooms.map((ele) => (
+                  <button
+                    key={ele.id}
+                    type="button"
+                    className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all border-gray-200 hover:border-gray-300`}
+                  >
+                    <img src={ele.Map.image } alt="roomsInage" className="w-full h-full object-cover" />
+                    <div className="absolute inset-x-0 bottom-0 bg-black/50 p-2">
+                      <p className="text-white text-sm text-center">{ele.name}</p>
+                    </div>
+                  </button>
+                ))}
+            {!recent && userrooms.map((ele) => (
                   <button
                     key={ele.id}
                     type="button"

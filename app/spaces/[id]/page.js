@@ -3,6 +3,7 @@ import { getSocket } from "../../../socket";
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
+// import LiveRoom from "../../components/LiveRoom";
 import { useUser } from "@clerk/nextjs";
 
 export default function Page() {

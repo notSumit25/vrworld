@@ -3,7 +3,7 @@ import { getSocket } from "../../../socket";
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
-import LiveRoom from "@/app/components/LiveRoom";
+import LiveRoom from "../../components/LiveRoom";
 
 export default function Page() {
   const { id } = useParams();

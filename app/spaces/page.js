@@ -46,10 +46,10 @@ export default function Home() {
   const [uploadedImage, setUploadedImage] = useState(null);
   const { useUploadThing } = generateReactHelpers();
   const { startUpload } = useUploadThing("imageUploader");
-  const [roomId, setroomId] = useState("");
-  const [rooms, setRooms] = useState([]);
-  const [userrooms, setUserRooms] = useState([]);
-  const [recent, setRecent] = useState(true);
+  const [roomId,setroomId]=useState("");
+  const [rooms,setRooms]=useState([]);
+  const [userrooms,setUserRooms]=useState([]);
+  const [recent ,setRecent]=useState(true);
   const [avatars, setAvatars] = useState([]);
   const [Avatar, setAvatar] = useState({
     id: null,

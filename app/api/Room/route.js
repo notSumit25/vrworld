@@ -107,7 +107,7 @@ export async function POST(req,res) {
     }
 }
 
-//Get all rooms
+//Get rooms
 
 export async function GET(req) {
     

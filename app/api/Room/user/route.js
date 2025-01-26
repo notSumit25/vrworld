@@ -35,7 +35,7 @@ export async function POST(req,res) {
             },
             include:{
                 users:true,
-                Map:true,
+                Map:true
             }
         }); 
         // console.log(room);
@@ -59,6 +59,7 @@ export async function POST(req,res) {
          avatars.forEach(ele => {
                 avatarmap.set(ele.id,ele);
             });
+        //    console.log(avatarmap);
     
        const data= room.users.map(ele =>{
               return {

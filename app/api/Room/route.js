@@ -29,6 +29,10 @@ export async function POST(req,res) {
         {
             return NextResponse.json({ error: 'User not found' });
         }
+        if(!avatarId)
+        {
+            return NextResponse.json({ error: 'Avatar not found' });
+        }
 
         
         
@@ -215,6 +219,11 @@ export async function PUT(req,res) {
                 }
             });
 
+            if(!avatar)
+            {
+                return NextResponse.json({ error: 'Avatar not found' });
+            }
+
             const findUser= await prisma.room.findFirst({
                 where:{
                     id:roomId,
@@ -230,7 +239,15 @@ export async function PUT(req,res) {
             {
                 return NextResponse.json({ msg: 'User already in room' });
             }
-    
+              
+             const Avroom = await prisma.room.findUnique({
+                where: { id: roomId },
+                select: { Avatars: true },
+              });
+
+              const updatedAvatars = [...(Avroom?.Avatars || []), { avatar: avatarId, user: user.id }];
+
+              
              const updatedRoom= await prisma.room.update({
                 where:{
                     id:roomId,
@@ -239,10 +256,7 @@ export async function PUT(req,res) {
                     users:{
                         connect:{id:user.id},
                     },
-                    Avatars:[{
-                        avatar:avatarId,
-                        user: user.id,
-                    }]
+                    Avatars:updatedAvatars,
                 }
             });
 

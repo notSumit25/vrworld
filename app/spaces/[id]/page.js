@@ -17,6 +17,8 @@ export default function Page() {
     direction: "down",
     clerkId: null,
     name: null,
+    spiritImage: null,
+    avatarName: null,
   });
   const [users, setUsers] = useState(new Map());
   const [direction, setDirection] = useState("down");
@@ -26,20 +28,22 @@ export default function Page() {
   const { isLoaded, isSignedIn, user: currUser } = useUser();
   const [spriteImage, setSpriteImage] = useState("");
 
-  
+  const usersmap=new Map();
   
   const fetchUsers = async () => {
     const res = await axios.post(`/api/Room/user`, { roomId: id });
     setRoomUsers(res.data.users);
     setMap(res.data.room.Map.image);
-    console.log("Room users", res.data.users);
-    console.log("Map", res.data.room.Map.image);
+    // console.log("Room users", res.data.users);
+    // console.log("Map", res.data.room.Map.image);
     const currUserSprite = res.data.users.find((u) => u.user.clerkId === currUser.id);
-    console.log("Curr user", currUser.id);
-    setUser({ ...user, clerkId: currUser.id, name: currUser.fullName });
-    console.log("Curr user sprite", currUserSprite);
+    // console.log("Curr user", currUserSprite);
+    setUser({ ...user, clerkId: currUserSprite.user.clerkId, name: currUserSprite.user.name ,spiritImage: currUserSprite.avatar.spiritImage, avatarName: currUserSprite.avatar.name});
+    // console.log("User", user);
+    // console.log("Curr user sprite", currUserSprite);
     if (currUserSprite) {
       setSpriteImage(currUserSprite.avatar.spiritImage);
+      console.log("Sprite image", spriteImage);
     }
     setLoading(false); 
   };
@@ -54,6 +58,7 @@ export default function Page() {
   useEffect(() => {
     socket.on("updateUsers", (users) => {
       console.log("Updating users", users);
+      console.log(users);
       setUsers(users);
     });
   }, []);
@@ -103,6 +108,8 @@ export default function Page() {
 
         // Draw other users
         users.forEach((otherUser) => {
+          const otherspiritImage = new Image();
+          otherspiritImage.src = otherUser.spiritImage;
           if (otherUser.id !== socket.id) {
             const dir =
               otherUser.direction === "down"
@@ -113,7 +120,7 @@ export default function Page() {
                 ? 2
                 : 3; // 'up'
             ctx.drawImage(
-              spriteImg,
+              otherspiritImage,
               0, // Always the first frame (x = 0)
               dir * spriteHeight, // Source y position
               spriteWidth, // Source width

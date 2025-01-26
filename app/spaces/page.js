@@ -101,6 +101,15 @@ export default function Home() {
     setIsCreateSpaceModalOpen(true);
   };
 
+  const handleEnterRoom = () => {
+    setIsEnterCodeModalOpen(true);
+    if(!Avatar.id)
+    {
+      setIsSetAvatarModalOpen(true);
+    }
+   
+  }
+
   const handleImageUpload = async (event) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -180,7 +189,7 @@ export default function Home() {
               />
             </div>
             <button
-              onClick={() => setIsEnterCodeModalOpen(true)}
+              onClick={handleEnterRoom}
               className="text-purple-600 hover:text-purple-700 font-medium flex items-center gap-2"
             >
               Enter with Code
@@ -194,10 +203,11 @@ export default function Home() {
           </div>
         </div>
 
-        <Modal
+    {Avatar.id &&    <Modal
           isOpen={isEnterCodeModalOpen}
           onClose={() => setIsEnterCodeModalOpen(false)}
           title="Enter with Code"
+
         >
           <input
             type="text"
@@ -212,7 +222,7 @@ export default function Home() {
           >
             Enter Space
           </button>
-        </Modal>
+        </Modal>}
 
         <Modal
           isOpen={isSetAvatarModalOpen}
@@ -227,6 +237,10 @@ export default function Home() {
                   type="button"
                   onClick={() => {
                     setAvatar(ele);
+                    if(isEnterCodeModalOpen)
+                    {
+                       setIsSetAvatarModalOpen(false);
+                    }
                   }}
                   className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
                     Avatar.image === ele.image

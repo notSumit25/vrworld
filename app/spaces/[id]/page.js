@@ -3,6 +3,7 @@ import { getSocket } from "../../../socket";
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
+import LiveRoom from "@/app/components/LiveRoom";
 
 export default function Page() {
   const { id } = useParams();
@@ -18,13 +19,16 @@ export default function Page() {
   const [direction, setDirection] = useState("down");
   const [map, setMap] = useState(null);
   const [roomUsers, setRoomUsers] = useState([]);
+  const [roomName, setRoomName] = useState("");
 
   const fetchUsers = async () => {
     const res = await axios.post(`/api/Room/user`,{roomId:id});
     setRoomUsers(res.data.users);
     setMap(res.data.room.Map);
+    setRoomName(res.data.room.name);
     console.log("Room users", res.data.users);
     console.log("Map", res.data.room.Map);
+
  };
 
   useEffect(() => {
@@ -150,6 +154,8 @@ export default function Page() {
   return (
     <div className="min-h-screen bg-gray-50 w-full">
       <canvas ref={canvasRef} className="w-full h-full" id="canvas"></canvas>
+      <h1>LiveKit Video Chat</h1>
+      <LiveRoom />
     </div>
   );
 }

@@ -123,7 +123,8 @@ export default function Home() {
       avatarId: Avatar.id,
     });
     const { msg } = response.data;
-    if (msg === "room is not full") {
+    console.log(msg);
+    if (msg === "room is not full" || msg === "User already in room") {
       router.push(`/spaces/${roomId}`);
     }
   };

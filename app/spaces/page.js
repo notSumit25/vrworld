@@ -45,7 +45,7 @@ export default function Home() {
   const [uploadedImage, setUploadedImage] = useState(null);
   const { useUploadThing } = generateReactHelpers();
   const { startUpload } = useUploadThing("imageUploader");
-  const [roomId,setroomId]=useState(null);
+  const [roomId,setroomId]=useState("");
   const [rooms,setRooms]=useState([]);
   const [userrooms,setUserRooms]=useState([]);
   const [recent ,setRecent]=useState(true);
@@ -127,7 +127,7 @@ export default function Home() {
       console.log(roomId);
       const response = await axios.put("/api/Room", {roomId, avatarId: Avatar.id});
       const {msg}=response.data;
-      if(msg === 'room is not full')
+      if(msg === 'room is not full' || msg === 'User already in room')
       {
         router.push(`/spaces/${roomId}`);
       }

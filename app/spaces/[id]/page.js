@@ -2,6 +2,7 @@
 import { getSocket } from "../../../socket";
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
+import axios from "axios";
 
 export default function Page() {
   const { id } = useParams();
@@ -15,10 +16,21 @@ export default function Page() {
   });
   const [users, setUsers] = useState(new Map());
   const [direction, setDirection] = useState("down");
+  const [map, setMap] = useState(null);
+  const [roomUsers, setRoomUsers] = useState([]);
+
+  const fetchUsers = async () => {
+    const res = await axios.post(`/api/Room/user`,{roomId:id});
+    setRoomUsers(res.data.users);
+    setMap(res.data.room.Map);
+    console.log("Room users", res.data.users);
+    console.log("Map", res.data.room.Map);
+ };
 
   useEffect(() => {
     socket.emit("joinSpace", id, user);
     console.log("Joining space", id);
+    fetchUsers();
   }, []);
 
   useEffect(() => {
@@ -96,6 +108,8 @@ export default function Page() {
 
       requestAnimationFrame(draw);
     };
+    
+
 
     const handleSpriteLoad = () => {
       draw();

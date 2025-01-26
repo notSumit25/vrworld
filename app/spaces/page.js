@@ -10,6 +10,7 @@ import { CreateSpaceModal } from "../components/Modal2";
 import axios from "axios";
 import { generateReactHelpers } from "@uploadthing/react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 // import { OurFileRouter } from "@/app/api/uploadthing/core";
 
@@ -45,18 +46,18 @@ export default function Home() {
   const [uploadedImage, setUploadedImage] = useState(null);
   const { useUploadThing } = generateReactHelpers();
   const { startUpload } = useUploadThing("imageUploader");
-  const [roomId,setroomId]=useState(null);
-  const [rooms,setRooms]=useState([]);
-  const [userrooms,setUserRooms]=useState([]);
-  const [recent ,setRecent]=useState(true);
+  const [roomId, setroomId] = useState("");
+  const [rooms, setRooms] = useState([]);
+  const [userrooms, setUserRooms] = useState([]);
+  const [recent, setRecent] = useState(true);
   const [avatars, setAvatars] = useState([]);
-  const [Avatar,setAvatar]=useState({
-    id:null,
+  const [Avatar, setAvatar] = useState({
+    id: null,
     name: "",
     image: "",
     spiritImage: "",
   });
-  const router=useRouter();
+  const router = useRouter();
 
   const imageOptions = [
     "/placeholder.svg?height=100&width=100&text=Image1",
@@ -65,19 +66,16 @@ export default function Home() {
     "/placeholder.svg?height=100&width=100&text=Image4",
   ];
 
+  useEffect(() => {
+    fetchRooms();
+    fetchAvatar();
+  }, []);
 
-  
-  useEffect(()=>{
-     fetchRooms();
-     fetchAvatar();
-  ;
-  },[])
-  
-  const  fetchAvatar = async() => {
+  const fetchAvatar = async () => {
     const response = await axios.get("/api/Avatar");
     setAvatars(response.data.avatars);
     console.log(response.data.avatars);
-  }
+  };
 
   useEffect(() => {
     fetchRooms();
@@ -88,25 +86,22 @@ export default function Home() {
     console.log(response.data);
     setRooms(response.data.rooms);
     setUserRooms(response.data.userrooms);
-  }
- 
+  };
+
   const handleClick = (roomId) => {
     setroomId(roomId);
     setIsSetAvatarModalOpen(true);
-    
-    
-  }
+  };
 
   const handleCreateRoom = () => {
-    if(!Avatar.id)
-    {
+    if (!Avatar.id) {
       setIsSetAvatarModalOpen(true);
     }
 
     setIsCreateSpaceModalOpen(true);
-  }
+  };
 
-  const handleImageUpload = async(event) => {
+  const handleImageUpload = async (event) => {
     const file = event.target.files?.[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
@@ -121,28 +116,28 @@ export default function Home() {
     }
   };
 
-
-
-    const joinRoom = async() => {
-      console.log(roomId);
-      const response = await axios.put("/api/Room", {roomId, avatarId: Avatar.id});
-      const {msg}=response.data;
-      if(msg === 'room is not full')
-      {
-        router.push(`/spaces/${roomId}`);
-      }
+  const joinRoom = async () => {
+    console.log(roomId);
+    const response = await axios.put("/api/Room", {
+      roomId,
+      avatarId: Avatar.id,
+    });
+    const { msg } = response.data;
+    if (msg === "room is not full") {
+      router.push(`/spaces/${roomId}`);
     }
-      
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-12"></div>
         <div className="flex items-center gap-4">
           <Link
-            href={"/spaces"}
+            href={"/"}
             className="px-6 py-2 text- bg-transparent rounded-full border-2 border-[#00B37D] hover:bg-[#00B37D] hover:text-white transition-colors"
           >
-            Explore Worlds
+           Home Page
           </Link>
           <UserButton />
         </div>
@@ -223,58 +218,95 @@ export default function Home() {
           onClose={() => setIsSetAvatarModalOpen(false)}
           title="Set Your Avatar"
         >
-            <div className="flex-col gap-4">
-              <div>
+          <div className="flex-col gap-4">
+            <div className="grid grid-cols-5">
               {avatars.map((ele) => (
-                  <button
-                    key={ele.id}
-                    type="button"
-                    onClick={() => {setAvatar(ele)}}
-                    className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                      Avatar.image === ele.image
-                        ? "border-purple-500 ring-2 ring-purple-500"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  >
-                    <img src={ele.image || "/placeholder.svg"} alt="avatar" className="w-full h-full object-cover" />
-                    <div className="absolute inset-x-0 bottom-0 bg-black/50 p-2">
-                      <p className="text-white text-sm text-center">{ele.name}</p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-             
-                {Avatar.id && <button className="bg-slate-400 border-black" onClick={joinRoom}> JOIN ROOM</button>}
-              </div>
+                <button
+                  key={ele.id}
+                  type="button"
+                  onClick={() => {
+                    setAvatar(ele);
+                  }}
+                  className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                    Avatar.image === ele.image
+                      ? "border-purple-500 ring-2 ring-purple-500"
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                >
+                  <Image
+                    src={ele.image || "/placeholder.svg"}
+                    width={100}
+                    height={100}
+                    alt="avatar"
+                    className=""
+                  />
+                  <div className="absolute inset-x-0 bottom-0 bg-black/50 p-2">
+                    <p className="text-white text-sm text-center">{ele.name}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {Avatar.id && (
+              <button className="bg-slate-400 border-black" onClick={joinRoom}>
+                {" "}
+                JOIN ROOM
+              </button>
+            )}
+          </div>
         </Modal>
 
-      {Avatar.id &&  <CreateSpaceModal isOpen={isCreateSpaceModalOpen} onClose={() => setIsCreateSpaceModalOpen(false)} avatarId={Avatar.id}  />}
-          {recent &&rooms.map((ele) => (
-                  <button
-                    key={ele.id}
-                    type="button"
-                    onClick={(e) => {handleClick(ele.id)}}
-                    className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all border-gray-200 hover:border-gray-300`}
-                  >
-                    <img src={ele.Map.image } alt="roomsInage" className="w-full h-full object-cover" />
-                    <div className="absolute inset-x-0 bottom-0 bg-black/50 p-2">
-                      <p className="text-white text-sm text-center">{ele.name}</p>
-                    </div>
-                  </button>
-                ))}
-            {!recent && userrooms.map((ele) => (
-                  <button
-                    key={ele.id}
-                    type="button"
-                    onClick={(e) => {handleClick(ele.id)}}
-                    className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all border-gray-200 hover:border-gray-300`}
-                  >
-                    <img src={ele.Map.image } alt="roomsInage" className="w-full h-full object-cover" />
-                    <div className="absolute inset-x-0 bottom-0 bg-black/50 p-2">
-                      <p className="text-white text-sm text-center">{ele.name}</p>
-                    </div>
-                  </button>
-                ))}
+        {Avatar.id && (
+          <CreateSpaceModal
+            isOpen={isCreateSpaceModalOpen}
+            onClose={() => setIsCreateSpaceModalOpen(false)}
+            avatarId={Avatar.id}
+          />
+        )}
+        {recent &&
+          rooms.map((ele) => (
+            <button
+              key={ele.id}
+              type="button"
+              onClick={(e) => {
+                handleClick(ele.id);
+              }}
+              className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all border-gray-200 hover:border-gray-300`}
+            >
+              <Image
+                width={200}
+                height={200}
+                src={ele.Map.image}
+                alt="roomsInage"
+                className=""
+              />
+              <div className="absolute inset-x-0 bottom-0 bg-black/50 p-2">
+                <p className="text-white text-sm text-center">{ele.name}</p>
+              </div>
+            </button>
+          ))}
+        {!recent &&
+          userrooms.map((ele) => (
+            <button
+              key={ele.id}
+              type="button"
+              onClick={(e) => {
+                handleClick(ele.id);
+              }}
+              className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all border-gray-200 hover:border-gray-300`}
+            >
+              <Image
+                width={200}
+                height={200}
+                src={ele.Map.image}
+                alt="roomsInage"
+                className=""
+              />
+              <div className="absolute inset-x-0 bottom-0 bg-black/50 p-2">
+                <p className="text-white text-sm text-center">{ele.name}</p>
+              </div>
+            </button>
+          ))}
       </main>
     </div>
   );

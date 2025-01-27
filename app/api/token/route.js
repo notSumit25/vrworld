@@ -7,6 +7,8 @@ export const revalidate = 0;
 export async function GET(req) {
   const room = req.nextUrl.searchParams.get('room');
   const username = req.nextUrl.searchParams.get('username');
+  console.log("Room",room);
+  console.log("Username",username);
   if (!room) {
     return NextResponse.json({ error: 'Missing "room" query parameter' }, { status: 400 });
   } else if (!username) {

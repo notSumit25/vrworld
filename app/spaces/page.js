@@ -13,7 +13,6 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { title } from "process";
 
-// import { OurFileRouter } from "@/app/api/uploadthing/core";
 
 const slides = [
   {

@@ -20,7 +20,7 @@ export default function HamburgerChat({ messages, sendMessage }) {
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-end p-4 pointer-events-none">
+    <div className="fixed inset-0 flex items-center justify-end p-4 pointer-events-none z-50 ">
       <button
         onClick={toggleChat}
         className="text-white bg-gray-800 hover:bg-gray-700 p-2 rounded-full focus:outline-none z-50 pointer-events-auto"

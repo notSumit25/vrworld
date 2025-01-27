@@ -46,19 +46,11 @@ export default function LiveRoom({ roomId, userName }) {
       token={token}
       serverUrl='wss://vrworld-1h0vzsvd.livekit.cloud'
       data-lk-theme="default"
-      style={{ height: '100vh', width: '100%', position: 'relative' }}
+      style={{ height: '100px', width: '100px', position: 'absolute', bottom: '10%', right: '20%' }}
     >
       <MyVideoConference cameraOn={cameraOn} setCameraOn={setCameraOn} />
       <RoomAudioRenderer />
-      <ControlBar>
-        {/* Toggle Camera Button */}
-        <button
-          onClick={() => setCameraOn((prev) => !prev)}
-          className="lk-button"
-        >
-          {cameraOn ? 'Turn Camera Off' : 'Turn Camera On'}
-        </button>
-      </ControlBar>
+      <ControlBar />
     </LiveKitRoom>
   );
 }

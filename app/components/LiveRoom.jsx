@@ -39,12 +39,12 @@ export default function LiveRoom({roomId, userName}) {
 
   return (
     <LiveKitRoom
-      token={token}
-      serverUrl={process.env.LIVEKIT_URL} // Your LiveKit server URL
       video={true}
       audio={true}
+      token={token}
+      serverUrl={process.env.LIVEKIT_URL} // Your LiveKit server URL
       data-lk-theme="default"
-      style={{ height: '100vh' }}
+      style={{ height: '100px', width: '100px', position: 'absolute', zIndex: 1000 }}
     >
       {/* The MyVideoConference component is where the video tiles are displayed */}
       <MyVideoConference />
@@ -59,13 +59,15 @@ export default function LiveRoom({roomId, userName}) {
 // The custom video conference component that renders the tracks
 function MyVideoConference() {
   // `useTracks` is used to subscribe to camera and screen share tracks
+  
   const tracks = useTracks(
     [
       { source: Track.Source.Camera, withPlaceholder: true },
       { source: Track.Source.ScreenShare, withPlaceholder: false },
     ],
-    { onlySubscribed: false }
+    { onlySubscribed: true }
   );
+  console.log("Tracks",tracks);
 
   return (
     <GridLayout

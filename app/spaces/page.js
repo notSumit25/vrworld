@@ -12,7 +12,6 @@ import { generateReactHelpers } from "@uploadthing/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-// import { OurFileRouter } from "@/app/api/uploadthing/core";
 
 const slides = [
   {

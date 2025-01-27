@@ -123,7 +123,6 @@ export default function Page() {
         users.forEach((otherUser) => {
           const otherspiritImage = new Image()
           otherspiritImage.src = otherUser.spiritImage
-          if (otherUser.id !== socket.id) {
             const dir =
               otherUser.direction === "down"
                 ? 0
@@ -143,7 +142,6 @@ export default function Page() {
               50, // Destination width
               50, // Destination height
             )
-          }
         })
 
         requestAnimationFrame(draw)

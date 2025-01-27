@@ -29,6 +29,7 @@ export default function Page() {
   const { isLoaded, isSignedIn, user: currUser } = useUser()
   const [spriteImage, setSpriteImage] = useState("")
   const [messages, setMessages] = useState([])
+  const [canvas,setCanvas]=useState(null);
   //const [newMessage, setNewMessage] = useState(""); //Removed as per update 4
   const usersmap = new Map()
 
@@ -82,6 +83,7 @@ export default function Page() {
       const ctx = canvas.getContext("2d")
       canvas.width = window.innerWidth
       canvas.height = window.innerHeight
+      setCanvas(canvas);
 
       const backgroundImg = new Image()
       backgroundImg.src = map
@@ -98,11 +100,22 @@ export default function Page() {
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height)
 
+
+        const maxX = canvas.width - 50  // 50 is the width of the sprite
+        const maxY = canvas.height - 50 // 50 is the height of the sprite
+  
+        // Apply boundary constraints to user position
+        const userX = Math.max(0, Math.min(user.x, maxX))
+        const userY = Math.max(0, Math.min(user.y, maxY))
         // Draw the current user
         const directionRow = direction === "down" ? 0 : direction === "left" ? 1 : direction === "right" ? 2 : 3 // 'up'
+        
+
         // Draw other users
         users.forEach((otherUser) => {
           const otherspiritImage = new Image()
+          const userX = Math.max(0, Math.min(otherUser.x, maxX))
+          const userY = Math.max(0, Math.min(otherUser.y, maxY))
           otherspiritImage.src = otherUser.spiritImage
             const dir =
               otherUser.direction === "down"
@@ -118,8 +131,8 @@ export default function Page() {
               dir * spriteHeight, // Source y position
               spriteWidth, // Source width
               spriteHeight, // Source height
-              otherUser.x, // Destination x position
-              otherUser.y, // Destination y position
+               userX, // Destination x position
+               userY, // Destination y position
               50, // Destination width
               50, // Destination height
             )
@@ -154,8 +167,17 @@ export default function Page() {
     } else if (key === "d" || key === "ArrowRight") {
       newUser = { ...newUser, x: newUser.x + 20, direction: "right" }
     }
-
-    if (newUser.x !== user.x || newUser.y !== user.y || newUser.direction !== user.direction) {
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext("2d")
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+    const maxX = canvas.width-50
+    const maxY = canvas.height -50
+    const userX = Math.max(0, Math.min(newUser.x, maxX))
+    const userY = Math.max(0, Math.min(newUser.y, maxY))
+    newUser.x = userX
+    newUser.y = userY
+    if (userX !== user.x || userY !== user.y || newUser.direction !== user.direction) {
       setDirection(newUser.direction)
       setUser(newUser)
       socket.emit("updateAttributes", id, newUser)

@@ -27,7 +27,8 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const { isLoaded, isSignedIn, user: currUser } = useUser();
   const [spriteImage, setSpriteImage] = useState("");
-
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState("");
   const usersmap=new Map();
   
   const fetchUsers = async () => {
@@ -61,6 +62,14 @@ export default function Page() {
       console.log(users);
       setUsers(users);
     });
+    const handleIncomingMessage = (message) => {
+      setMessages((prevMessages) => [...prevMessages, message]);
+    };
+
+    socket.on("message", handleIncomingMessage);
+    return () => {
+      socket.off("message", handleIncomingMessage);
+    };
   }, []);
 
   useEffect(() => {
@@ -144,6 +153,18 @@ export default function Page() {
     }
   }, [user, direction, users, loading, spriteImage]);
 
+  const sendMessage = () => {
+    console.log("clicked");
+    console.log("Sending message", newMessage, user.name);
+    socket.emit("message", { text: newMessage, user: user.name }, id);
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { text: newMessage, user: user.name },
+    ]);
+    
+    setNewMessage("");
+  }
+
   const handleKeyDown = (e) => {
     const key = e.key;
     let newUser = { ...user };
@@ -185,7 +206,37 @@ export default function Page() {
           <p>Loading...</p>
         </div>
       ) : (
+        <>
+        {console.log("component rendered")}
         <canvas ref={canvasRef} className="w-full h-full" id="canvas"></canvas>
+        
+        <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-300">
+        <div className="h-64 overflow-y-scroll p-4">
+          {console.log("Messages", messages)}
+          {messages.map((msg, index) => (
+            <div key={index} className="mb-2">
+              <strong>{msg.user}:</strong> {msg.text}
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center p-2 border-t border-gray-300">
+          <input
+            id="chatInput"
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            placeholder="Type your message..."
+            className="flex-grow p-2 border border-gray-300 rounded"
+          />
+          <button
+            onClick={sendMessage}
+            className="ml-2 px-4 py-2 bg-blue-500 text-white rounded"
+          >
+            Send
+          </button>
+        </div>
+      </div>
+      </>
       )}
     </div>
   );

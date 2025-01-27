@@ -107,17 +107,7 @@ export default function Page() {
         const userY = Math.max(0, Math.min(user.y, maxY))
         // Draw the current user
         const directionRow = direction === "down" ? 0 : direction === "left" ? 1 : direction === "right" ? 2 : 3 // 'up'
-        ctx.drawImage(
-          spriteImg,
-          0, // Always the first frame (x = 0)
-          directionRow * spriteHeight, // Source y position
-          spriteWidth, // Source width
-          spriteHeight, // Source height
-          userX, // Destination x position
-          userY, // Destination y position
-          50, // Destination width
-          50, // Destination height
-        )
+        
 
         // Draw other users
         users.forEach((otherUser) => {

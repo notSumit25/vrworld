@@ -114,6 +114,8 @@ export default function Page() {
         // Draw other users
         users.forEach((otherUser) => {
           const otherspiritImage = new Image()
+          const userX = Math.max(0, Math.min(otherUser.x, maxX))
+          const userY = Math.max(0, Math.min(otherUser.y, maxY))
           otherspiritImage.src = otherUser.spiritImage
             const dir =
               otherUser.direction === "down"
@@ -129,8 +131,8 @@ export default function Page() {
               dir * spriteHeight, // Source y position
               spriteWidth, // Source width
               spriteHeight, // Source height
-              otherUser.x, // Destination x position
-              otherUser.y, // Destination y position
+               userX, // Destination x position
+               userY, // Destination y position
               50, // Destination width
               50, // Destination height
             )

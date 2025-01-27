@@ -46,11 +46,11 @@ export default function LiveRoom({ roomId, userName }) {
       token={token}
       serverUrl='wss://vrworld-1h0vzsvd.livekit.cloud'
       data-lk-theme="default"
-      style={{ height: '100px', width: '100px', position: 'absolute', bottom: '10%', right: '20%' }}
+      style={{ height: '100px', width: '100px', position: 'absolute', bottom: '10%', right: '10%' }}
     >
       <MyVideoConference cameraOn={cameraOn} setCameraOn={setCameraOn} />
       <RoomAudioRenderer />
-      <ControlBar />
+      <ControlBar variation='minimal' />
     </LiveKitRoom>
   );
 }

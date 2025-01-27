@@ -3,6 +3,7 @@ import { getAuth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { use } from 'react';
 import { connect } from 'http2';
+import { type } from 'os';
 
 const prisma = new PrismaClient();
 
@@ -28,8 +29,9 @@ export async function POST(req,res) {
         {
             return NextResponse.json({ error: 'User not found' });
         }
-  
-        const room= await prisma.room.findUnique({
+        let type="room";
+        let room=null;
+        room= await prisma.room.findUnique({
             where:{
                 id:roomId,
             },
@@ -39,7 +41,22 @@ export async function POST(req,res) {
             }
         }); 
         // console.log(room);
-      
+        
+
+        if(!room)
+        {
+
+             room= await prisma.globalRoom.findUnique({
+                where:{
+                    id:roomId,
+                },
+                include:{
+                    users:true,
+                    Map:true
+                }
+            });
+            type="globalRoom";
+        }
         if(!room)
         {
             return NextResponse.json({ error: 'Room not found' });
@@ -68,7 +85,8 @@ export async function POST(req,res) {
               }
        })
     //    console.log(data);
-      return NextResponse.json({users:data,room:room});
+    
+      return NextResponse.json({users:data,room:room,type:type});
     
 
     }

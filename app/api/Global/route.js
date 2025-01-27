@@ -7,53 +7,42 @@ const prisma = new PrismaClient();
 
 //Create a Room
 export async function POST(req,res) {
- 
-    const { userId } = getAuth(req);
-    if (!userId) {
-        return  NextResponse.json({ error: 'User not authenticated' });
-    }
+
     
     try{
         const body = await req.json();
+        console.log(body);
+        const {name,capacity,image  }=body;
         
-        const {name,theme,capacity}=body;
-        
-        const user= await prisma.user.findUnique({
+        const findMap= await prisma.map.findFirst({
             where:{
-             clerkId: userId,
+                image:image,
             }
         });
 
-        if(!user)
-        {
-            return NextResponse.json({ error: 'User not found' });
+        let mapId=null;
+          
+        if(!findMap){
+          return NextResponse.json({ error: 'Map not found' });
+        }else {
+            mapId=findMap.id;
         }
 
-        const findRoom= await prisma.globalroom.findFirst({
-            where:{
-                name,
-            }
-        });
-
-        if(findRoom)
-        {
-            return NextResponse.json({ error: 'Room already exists' });
-        }
-
-       const newRoom= await prisma.globalRoom.create({
+        // console.log(name,capacity,avatarId,user.id,mapId);
+         const cap=Number(capacity);
+       const newRoom = await prisma.globalRoom.create({
             data: {
                 name,
-                theme,
-                capacity,
-                users: {
-                    connect: { id: user.id }, 
-                }
-            },
+                capacity:cap,
+                Map:{
+                    connect:{id:mapId},
+                },
+            }
         });
-
-        const updateUser= await prisma.user.update({
+       
+        const updateMap= await prisma.map.update({
             where:{
-                id:user.id,
+                id:mapId,
             },
             data:{
                 globalRooms:{
@@ -62,7 +51,7 @@ export async function POST(req,res) {
             }
         });
       
-        return NextResponse.json({msg:newRoom});
+        return NextResponse.json({msg :"new room created",room:newRoom});
 
     }
     catch(e)
@@ -71,49 +60,8 @@ export async function POST(req,res) {
         return NextResponse.json({ error: 'Internal server error' });
     }
 }
-
-//Get all rooms
-
-export async function GET(req) {
-    
-        const { userId } = getAuth(req);
-        if (!userId) {
-            return  NextResponse.json({ error: 'User not authenticated' });
-        }
-        
-        try{
-          
-            const user= await prisma.user.findUnique({
-                where:{
-                clerkId: userId,
-                }
-            });
-    
-            if(!user)
-            {
-                return NextResponse.json({ error: 'User not found' });
-            }
-    
-            const rooms= await prisma.globalRoom.findMany({
-                where:{
-                },
-                include:{
-                    users:true,
-                }
-            });
-    
-            return NextResponse.json({msg:rooms});
-    
-        }
-        catch(e)
-        {
-            console.log(e);
-            return NextResponse.json({ error: 'Internal server error' });
-        }
-    }
     
 //JOIN ROOM
-
 export async function PUT(req,res) {
     
         const { userId } = getAuth(req);
@@ -124,7 +72,7 @@ export async function PUT(req,res) {
         try{
             const body = await req.json();
             
-            const {roomId}=body;
+            const {roomId,avatarId}=body;
             
             const user= await prisma.user.findUnique({
                 where:{
@@ -136,10 +84,14 @@ export async function PUT(req,res) {
             {
                 return NextResponse.json({ error: 'User not found' });
             }
+          
     
             const room= await prisma.globalRoom.findUnique({
                 where:{
                     id:roomId,
+                },
+                include:{
+                    users:true,
                 }
             });
     
@@ -147,7 +99,23 @@ export async function PUT(req,res) {
             {
                 return NextResponse.json({ error: 'Room not found' });
             }
-    
+          
+            if(room.capacity<=room.users.length)
+            {
+                return NextResponse.json({ msg: 'Room is full' });
+            }
+           
+            const avatar= await prisma.avatar.findUnique({
+                where:{
+                    id:Number(avatarId),
+                }
+            });
+
+            if(!avatar)
+            {
+                return NextResponse.json({ error: 'Avatar not found' });
+            }
+
             const findUser= await prisma.globalRoom.findFirst({
                 where:{
                     id:roomId,
@@ -161,9 +129,17 @@ export async function PUT(req,res) {
     
             if(findUser)
             {
-                return NextResponse.json({ error: 'User already in room' });
+                return NextResponse.json({ msg: 'User already in room' });
             }
-    
+              
+             const Avroom = await prisma.globalRoom.findUnique({
+                where: { id: roomId },
+                select: { Avatars: true },
+              });
+
+              const updatedAvatars = [...(Avroom?.Avatars || []), { avatar: avatarId, user: user.id }];
+
+              
              const updatedRoom= await prisma.globalRoom.update({
                 where:{
                     id:roomId,
@@ -171,7 +147,8 @@ export async function PUT(req,res) {
                 data:{
                     users:{
                         connect:{id:user.id},
-                    }
+                    },
+                    Avatars:updatedAvatars,
                 }
             });
 
@@ -186,8 +163,27 @@ export async function PUT(req,res) {
                 }
             });
         
-            return NextResponse.json({msg:updatedRoom});
+            return NextResponse.json({msg:"room is not full", room :updatedRoom});
     
+        }
+        catch(e)
+        {
+            console.log(e);
+            return NextResponse.json({ error: 'Internal server error' });
+        }
+    }
+
+//Get All Rooms
+export async function GET(req,res) {
+    
+        try{
+            const rooms= await prisma.globalRoom.findMany({
+                include:{
+                    Map:true,
+                    users:true,
+                }
+            });
+            return NextResponse.json({rooms});
         }
         catch(e)
         {

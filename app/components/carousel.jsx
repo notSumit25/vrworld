@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import axios from "axios"
 
 
 
-export function Carousel({ slides }) {
+export function Carousel({ slides , setIsSetAvatarModalOpen,setSlide ,Avatar}) {
   const [currentSlide, setCurrentSlide] = useState(0)
 
   const nextSlide = () => {
@@ -15,7 +16,14 @@ export function Carousel({ slides }) {
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)
   }
-
+  
+  const handleClick=(currslide)=>{
+    setSlide(currslide);
+    if(!Avatar.id){
+      setIsSetAvatarModalOpen(true);
+    }
+  }
+  
   useEffect(() => {
     const timer = setInterval(nextSlide, 5000)
     return () => clearInterval(timer)
@@ -28,7 +36,7 @@ export function Carousel({ slides }) {
         style={{ transform: `translateX(-${currentSlide * 100}%)` }}
       >
         {slides.map((slide, index) => (
-          <div key={index} className="w-full h-full flex-shrink-0 relative">
+          <div onClick={() => handleClick(slide)} key={index} className="w-full h-full flex-shrink-0 relative">
             <img src={slide.image || "/placeholder.svg"} alt={slide.title} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent">
               <div className="absolute bottom-8 left-8 text-white">

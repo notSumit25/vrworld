@@ -11,31 +11,41 @@ import axios from "axios";
 import { generateReactHelpers } from "@uploadthing/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { title } from "process";
 
 // import { OurFileRouter } from "@/app/api/uploadthing/core";
 
 const slides = [
   {
+    roomId:"64ca7a31-115e-41da-afc3-e34c2eef7262",
     title: "ZEP Boxing",
     description: "Defeat other players and become the champion!",
-    image:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-MIIRKzcy4QnfPXa4MC0c1qDhzY178Y.png",
+    image: "https://6zbrwlnqfb.ufs.sh/f/ZiOcTFqmdHkJCQDXzRdqDGhvWa1jib2LToVz8PrO4QuMen93",
     tags: ["Official", "Game"],
   },
   {
+    roomId:"f246b001-6082-4329-a447-d8d7f612ae8e",
     title: "ZEP Study room",
     description: "Study alone or with friends in our new study room!",
     image:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-MIIRKzcy4QnfPXa4MC0c1qDhzY178Y.png",
+    "https://6zbrwlnqfb.ufs.sh/f/ZiOcTFqmdHkJCq1teNUdqDGhvWa1jib2LToVz8PrO4QuMen9",
     tags: ["Official", "Gathering"],
   },
   {
+    roomId:"8f58f78d-d4ce-49ce-b79d-f39fda23df5b",
     title: "Bonbon School Detectives",
     description: "Uncover the truth behind the missing students",
     image:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-MIIRKzcy4QnfPXa4MC0c1qDhzY178Y.png",
+    "https://6zbrwlnqfb.ufs.sh/f/ZiOcTFqmdHkJIgw8OVOHzlXoRr38J4TusMLwKjPZgxyd1Y9D",
     tags: ["Official", "Game"],
   },
+  {
+    roomId: "3cc618fc-5a79-4f88-9bd1-bab42beebb26",
+    title: "ZEP Tournament",
+    description: "Join the tournament and win amazing prizes!",
+    image:"https://6zbrwlnqfb.ufs.sh/f/ZiOcTFqmdHkJVtSINJbUFRyn97d6iOMz8wlAm1eTo5YLfIHk",
+    tags: ["Official", "Event"],
+  }
 ];
 
 export default function Home() {
@@ -58,6 +68,7 @@ export default function Home() {
     spiritImage: "",
   });
   const router = useRouter();
+  const [slide, setSlide] = useState(null);
 
   const imageOptions = [
     "/placeholder.svg?height=100&width=100&text=Image1",
@@ -125,8 +136,28 @@ export default function Home() {
     }
   };
 
+  const joinGlobalRoom = async () => {
+    console.log("check",slide.roomId, Avatar.id);
+    const response = await axios.put("/api/Global", {
+      roomId:slide.roomId,
+      avatarId: Avatar.id,
+    });
+    const { msg } = response.data;
+    console.log(msg);
+    if (msg === "room is not full" || msg === "User already in room") {
+      router.push(`/spaces/${slide.roomId}`);
+    }
+  }
+
   const joinRoom = async () => {
-    console.log(roomId);
+    console.log(slide);
+    if(slide)
+    {
+      console.log("slide",slide.roomId);
+      setroomId(slide.roomId);
+      joinGlobalRoom();
+      return;
+    }
     const response = await axios.put("/api/Room", {
       roomId,
       avatarId: Avatar.id,
@@ -153,7 +184,7 @@ export default function Home() {
         </div>
       </nav>
       <main className="max-w-7xl mx-auto px-4 py-8">
-        <Carousel slides={slides} />
+        <Carousel slides={slides}  setIsSetAvatarModalOpen={setIsSetAvatarModalOpen} setSlide={setSlide} Avatar={Avatar}/>
 
         <div className="mt-8 flex items-center justify-between">
           <div className="flex gap-4">

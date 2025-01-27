@@ -40,7 +40,9 @@ model GlobalRoom{
   name    String
   users   User[] @relation("GlobalRooms")
   capacity Int
-  
+  mapId   Int
+  Map     Map   @relation("MapGRooms", fields: [mapId], references: [id])
+  Avatars Json[]
 }
 
 model Map{
@@ -48,6 +50,7 @@ model Map{
   name    String
   image   String
   rooms   Room[] @relation("MapRooms")
+  globalRooms GlobalRoom[] @relation("MapGRooms")
 }
 
 model Avatar{

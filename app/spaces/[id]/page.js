@@ -100,21 +100,8 @@ export default function Page() {
 
         // Draw the current user
         const directionRow = direction === "down" ? 0 : direction === "left" ? 1 : direction === "right" ? 2 : 3 // 'up'
-        ctx.drawImage(
-          spriteImg,
-          0, // Always the first frame (x = 0)
-          directionRow * spriteHeight, // Source y position
-          spriteWidth, // Source width
-          spriteHeight, // Source height
-          user.x, // Destination x position
-          user.y, // Destination y position
-          50, // Destination width
-          50, // Destination height
-        )
-
         // Draw other users
         users.forEach((otherUser) => {
-          if (otherUser.id !== socket.id) {
           const otherspiritImage = new Image()
           otherspiritImage.src = otherUser.spiritImage
             const dir =
@@ -136,7 +123,6 @@ export default function Page() {
               50, // Destination width
               50, // Destination height
             )
-          }
         })
 
         requestAnimationFrame(draw)

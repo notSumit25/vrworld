@@ -12,9 +12,10 @@ import {
 import '@livekit/components-styles';
 import { Track } from 'livekit-client';
 
-export default function LiveRoom() {
-  const room = 'quickstart-room'; // Example room name
-  const name = 'quickstart-user'; // Example user name
+export default function LiveRoom({roomId, userName}) {
+  console.log("Liveroom",roomId, userName);
+  const room = roomId; // Example room name
+  const name = userName;
   const [token, setToken] = useState('');
 
   // Fetch token on page load

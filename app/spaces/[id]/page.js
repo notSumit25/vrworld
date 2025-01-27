@@ -3,7 +3,7 @@ import { getSocket } from "../../../socket";
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
-// import LiveRoom from "../../components/LiveRoom";
+import LiveRoom from "../../components/LiveRoom";
 import { useUser } from "@clerk/nextjs";
 
 export default function Page() {
@@ -50,6 +50,7 @@ export default function Page() {
   };
   useEffect(() => {
     if(isLoaded && isSignedIn){
+    
       socket.emit("joinSpace", id, user);
       console.log("Joining space", id);
       fetchUsers();
@@ -207,9 +208,9 @@ export default function Page() {
         </div>
       ) : (
         <>
-        {console.log("component rendered")}
-        <canvas ref={canvasRef} className="w-full h-full" id="canvas"></canvas>
         
+        <canvas ref={canvasRef} className="w-full h-full" id="canvas"></canvas>
+        {  <LiveRoom roomId={id} userName={currUser.id} />}
         <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-300">
         <div className="h-64 overflow-y-scroll p-4">
           {console.log("Messages", messages)}

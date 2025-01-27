@@ -169,8 +169,8 @@ export default function Page() {
     const ctx = canvas.getContext("2d")
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
-    const maxX = canvas.width 
-    const maxY = canvas.height 
+    const maxX = canvas.width-50
+    const maxY = canvas.height -50
     const userX = Math.max(0, Math.min(newUser.x, maxX))
     const userY = Math.max(0, Math.min(newUser.y, maxY))
     newUser.x = userX

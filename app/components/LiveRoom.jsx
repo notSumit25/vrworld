@@ -8,15 +8,17 @@ import {
   ParticipantTile,
   RoomAudioRenderer,
   useTracks,
+  useLocalParticipant,
 } from '@livekit/components-react';
 import '@livekit/components-styles';
 import { Track } from 'livekit-client';
 
-export default function LiveRoom({roomId, userName}) {
-  console.log("Liveroom",roomId, userName);
-  const room = roomId; // Example room name
+export default function LiveRoom({ roomId, userName }) {
+  console.log("LiveRoom", roomId, userName);
+  const room = roomId;
   const name = userName;
   const [token, setToken] = useState('');
+  const [cameraOn, setCameraOn] = useState(true); // Camera toggle state
 
   // Fetch token on page load
   useEffect(() => {
@@ -42,24 +44,27 @@ export default function LiveRoom({roomId, userName}) {
       video={true}
       audio={true}
       token={token}
-      serverUrl={process.env.LIVEKIT_URL} // Your LiveKit server URL
+      serverUrl='wss://vrworld-1h0vzsvd.livekit.cloud'
       data-lk-theme="default"
-      style={{ height: '100px', width: '100px', position: 'absolute', zIndex: 1000 }}
+      style={{ height: '100vh', width: '100%', position: 'relative' }}
     >
-      {/* The MyVideoConference component is where the video tiles are displayed */}
-      <MyVideoConference />
-      {/* Audio renderer for room-wide audio */}
+      <MyVideoConference cameraOn={cameraOn} setCameraOn={setCameraOn} />
       <RoomAudioRenderer />
-      {/* Control bar for user actions like audio/video toggle */}
-      <ControlBar />
+      <ControlBar>
+        {/* Toggle Camera Button */}
+        <button
+          onClick={() => setCameraOn((prev) => !prev)}
+          className="lk-button"
+        >
+          {cameraOn ? 'Turn Camera Off' : 'Turn Camera On'}
+        </button>
+      </ControlBar>
     </LiveKitRoom>
   );
 }
 
 // The custom video conference component that renders the tracks
-function MyVideoConference() {
-  // `useTracks` is used to subscribe to camera and screen share tracks
-  
+function MyVideoConference({ cameraOn, setCameraOn }) {
   const tracks = useTracks(
     [
       { source: Track.Source.Camera, withPlaceholder: true },
@@ -67,14 +72,31 @@ function MyVideoConference() {
     ],
     { onlySubscribed: true }
   );
-  console.log("Tracks",tracks);
+
+  const localParticipant = useLocalParticipant();
+
+  // Handle camera toggle when the state changes
+  useEffect(() => {
+    if (localParticipant && localParticipant.isLocal) {
+      const videoTrack = localParticipant.tracks.find(track => track.source === Track.Source.Camera);
+      
+      if (videoTrack) {
+        console.log('Video track:', videoTrack);
+        // Toggle the video track enabled/disabled
+        if (cameraOn) {
+          videoTrack.isMuted = false;  // Unmute the camera (turn on)
+        } else {
+          videoTrack.isMuted = true;   // Mute the camera (turn off)
+        }
+      }
+    }
+  }, [cameraOn, localParticipant]);
 
   return (
     <GridLayout
       tracks={tracks}
       style={{ height: 'calc(100vh - var(--lk-control-bar-height))' }}
     >
-      {/* ParticipantTile is used to render the individual video tiles */}
       <ParticipantTile />
     </GridLayout>
   );

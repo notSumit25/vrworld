@@ -19,7 +19,8 @@ const slides = [
     roomId:"64ca7a31-115e-41da-afc3-e34c2eef7262",
     title: "ZEP Boxing",
     description: "Defeat other players and become the champion!",
-    image: "https://6zbrwlnqfb.ufs.sh/f/ZiOcTFqmdHkJCQDXzRdqDGhvWa1jib2LToVz8PrO4QuMen93",
+    image:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-MIIRKzcy4QnfPXa4MC0c1qDhzY178Y.png",
     tags: ["Official", "Game"],
   },
   {
@@ -27,7 +28,7 @@ const slides = [
     title: "ZEP Study room",
     description: "Study alone or with friends in our new study room!",
     image:
-    "https://6zbrwlnqfb.ufs.sh/f/ZiOcTFqmdHkJCq1teNUdqDGhvWa1jib2LToVz8PrO4QuMen9",
+    "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-MIIRKzcy4QnfPXa4MC0c1qDhzY178Y.png",
     tags: ["Official", "Gathering"],
   },
   {
@@ -35,7 +36,7 @@ const slides = [
     title: "Bonbon School Detectives",
     description: "Uncover the truth behind the missing students",
     image:
-    "https://6zbrwlnqfb.ufs.sh/f/ZiOcTFqmdHkJIgw8OVOHzlXoRr38J4TusMLwKjPZgxyd1Y9D",
+    "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-MIIRKzcy4QnfPXa4MC0c1qDhzY178Y.png",
     tags: ["Official", "Game"],
   },
   {

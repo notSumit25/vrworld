@@ -98,6 +98,13 @@ export default function Page() {
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height)
 
+
+        const maxX = canvas.width - 50  // 50 is the width of the sprite
+        const maxY = canvas.height - 50 // 50 is the height of the sprite
+  
+        // Apply boundary constraints to user position
+        const userX = Math.max(0, Math.min(user.x, maxX))
+        const userY = Math.max(0, Math.min(user.y, maxY))
         // Draw the current user
         const directionRow = direction === "down" ? 0 : direction === "left" ? 1 : direction === "right" ? 2 : 3 // 'up'
         ctx.drawImage(
@@ -106,8 +113,8 @@ export default function Page() {
           directionRow * spriteHeight, // Source y position
           spriteWidth, // Source width
           spriteHeight, // Source height
-          user.x, // Destination x position
-          user.y, // Destination y position
+          userX, // Destination x position
+          userY, // Destination y position
           50, // Destination width
           50, // Destination height
         )

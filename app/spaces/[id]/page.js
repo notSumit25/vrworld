@@ -29,6 +29,7 @@ export default function Page() {
   const { isLoaded, isSignedIn, user: currUser } = useUser()
   const [spriteImage, setSpriteImage] = useState("")
   const [messages, setMessages] = useState([])
+  const [canvas,setCanvas]=useState(null);
   //const [newMessage, setNewMessage] = useState(""); //Removed as per update 4
   const usersmap = new Map()
 
@@ -82,6 +83,7 @@ export default function Page() {
       const ctx = canvas.getContext("2d")
       canvas.width = window.innerWidth
       canvas.height = window.innerHeight
+      setCanvas(canvas);
 
       const backgroundImg = new Image()
       backgroundImg.src = map
@@ -163,8 +165,17 @@ export default function Page() {
     } else if (key === "d" || key === "ArrowRight") {
       newUser = { ...newUser, x: newUser.x + 20, direction: "right" }
     }
-
-    if (newUser.x !== user.x || newUser.y !== user.y || newUser.direction !== user.direction) {
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext("2d")
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+    const maxX = canvas.width 
+    const maxY = canvas.height 
+    const userX = Math.max(0, Math.min(newUser.x, maxX))
+    const userY = Math.max(0, Math.min(newUser.y, maxY))
+    newUser.x = userX
+    newUser.y = userY
+    if (userX !== user.x || userY !== user.y || newUser.direction !== user.direction) {
       setDirection(newUser.direction)
       setUser(newUser)
       socket.emit("updateAttributes", id, newUser)

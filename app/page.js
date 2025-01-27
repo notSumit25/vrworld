@@ -46,12 +46,12 @@ export default function Home() {
               teams.
             </p>
             <div className="flex items-center gap-4 pt-4">
-              <button className="px-6 py-3 bg-[#00B37D] text-white rounded-full hover:bg-[#00A070] transition-colors">
+              <Link href={'/spaces/3cc618fc-5a79-4f88-9bd1-bab42beebb26'} className="px-6 py-3 bg-[#00B37D] text-white rounded-full hover:bg-[#00A070] transition-colors">
                 Join the Global World
-              </button>
-              <button className="px-6 py-3 text-white flex items-center gap-2 hover:bg-white/10 rounded-full transition-colors">
+              </Link>
+              <Link href={'/spaces'} className="px-6 py-3 text-white flex items-center gap-2 hover:bg-white/10 rounded-full transition-colors">
                 Build your own world
-              </button>
+              </Link>
             </div>
           </div>
 

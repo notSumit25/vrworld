@@ -1,85 +1,90 @@
-import { PrismaClient } from '@prisma/client';
-import { getAuth } from '@clerk/nextjs/server';
-import { NextResponse } from 'next/server';
+import { PrismaClient } from "@prisma/client";
+import { getAuth } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
 
 const prisma = new PrismaClient();
 
-export async function POST(req,res) {
- 
-    const { userId } = getAuth(req);
-  
-    if (!userId) {
-        return  NextResponse.json({ error: 'User not authenticated' });
+export async function POST(req, res) {
+  const { isAuthenticated, redirectToSignIn, userId } = await auth();
+
+  if (!userId) {
+    return NextResponse.json({ error: "User not authenticated" });
+  }
+
+  try {
+    const user = await currentUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "User data not found" });
     }
-    
-    try{
-        const user = await fetch(`https://api.clerk.dev/v1/users/${userId}`, {
-            headers: {
-              Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
-            },
-          }).then((res) => res.json());
 
-        //   console.log(user);
-        const { first_name,id,email_addresses,image_url,username } = user;
-        const email = email_addresses[0]?.email_address;
+    // console.log(user);
+    // console.log(user.emailAddresses[0].emailAddress);
+    const { firstName, id: clerkId, emailAddresses, imageUrl, username } = user;
+    // console.log(firstName, id, imageUrl, username);
+    const email = emailAddresses[0].emailAddress;
 
-        const findUser = await prisma.user.findUnique({
-            where:{
-                clerkId: id,
-            }
-        }); 
-
-        if(findUser)
-        {
-            return NextResponse.json({ user: findUser });
-        }
-
-        const newUser = await prisma.user.upsert({
-            where: { clerkId: id },
-            update: {},
-            create: {
-                name: first_name,
-                email: email,
-                clerkId: id,
-            },
-          });
-
-        return NextResponse.json({ user: newUser });
+    if (!email) {
+      return NextResponse.json({ error: "User email not found" });
     }
-    catch(e)
-    {
-        console.log(e);
-        return NextResponse.json({ error: 'Internal server error' });
+    // console.log(await prisma.user.findMany());
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        clerkId: clerkId,
+      },
+    });
+    const findUser = await prisma.user.findUnique({
+      where: {
+        clerkId: clerkId,
+      },
+    });
+    console.log(findUser);
+    if (findUser) {
+      return NextResponse.json({ user: findUser });
     }
+
+    const newUser = await prisma.user.upsert({
+      where: { clerkId: clerkId },
+      update: {},
+      create: {
+        name: firstName,
+        email: email,
+        clerkId: clerkId,
+      },
+    });
+
+    return NextResponse.json({ user: newUser });
+  } catch (e) {
+    console.log(e);
+    return NextResponse.json({ error: "Internal server error" });
+  }
 }
-    
+
 // Get User
 
-export async function GET(req,res) {
-    const { userId } = getAuth(req);
-    if (!userId) {
-        return  NextResponse.json({ error: 'User not authenticated' });
+export async function GET(req, res) {
+  const { isAuthenticated, redirectToSignIn, userId } = await auth();
+  if (!userId) {
+    return NextResponse.json({ error: "User not authenticated" });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        clerkId: userId,
+      },
+      include: {
+        rooms: true,
+      },
+    });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" });
     }
-    
-    try{
-    
-        const user = await prisma.user.findUnique({
-            where:{
-                clerkId: userId,
-            },
-            include:{
-                rooms:true,
-            }
-        });
-        if(!user)
-        {
-            return NextResponse.json({ error: 'User not found' });
-        }
-        return NextResponse.json({ user });
-    }
-    catch(e)
-    {
-        console.log(e);
-        return NextResponse.json({ error: 'Internal server error' });
-    }
+    return NextResponse.json({ user });
+  } catch (e) {
+    console.log(e);
+    return NextResponse.json({ error: "Internal server error" });
+  }
 }

@@ -1,16 +1,16 @@
-"use client"
-import { getSocket } from "../../../socket"
-import React, { useEffect, useRef, useState } from "react"
-import { useParams } from "next/navigation"
-import axios from "axios"
-import LiveRoom from "../../components/LiveRoom"
-import { useUser } from "@clerk/nextjs"
-import HamburgerChat from "../../components/HamburgerChat.jsx"
+"use client";
+import { getSocket } from "../../../socket";
+import React, { useEffect, useRef, useState } from "react";
+import { useParams } from "next/navigation";
+import axios from "axios";
+import LiveRoom from "../../components/LiveRoom";
+import { useUser } from "@clerk/nextjs";
+import HamburgerChat from "../../components/HamburgerChat.jsx";
 
 export default function Page() {
-  const { id } = useParams()
-  const socket = getSocket()
-  const canvasRef = useRef(null)
+  const { id } = useParams();
+  const socket = getSocket();
+  const canvasRef = useRef(null);
   const [user, setUser] = useState({
     x: 50,
     y: 50,
@@ -20,24 +20,28 @@ export default function Page() {
     name: null,
     spiritImage: null,
     avatarName: null,
-  })
-  const [users, setUsers] = useState(new Map())
-  const [direction, setDirection] = useState("down")
-  const [map, setMap] = useState(null)
-  const [roomUsers, setRoomUsers] = useState([])
-  const [loading, setLoading] = useState(true)
-  const { isLoaded, isSignedIn, user: currUser } = useUser()
-  const [spriteImage, setSpriteImage] = useState("")
-  const [messages, setMessages] = useState([])
-  const [canvas,setCanvas]=useState(null);
+  });
+  const [users, setUsers] = useState(new Map());
+  const [direction, setDirection] = useState("down");
+  const [map, setMap] = useState(null);
+  const [roomUsers, setRoomUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { isLoaded, isSignedIn, user: currUser } = useUser();
+  const [spriteImage, setSpriteImage] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [canvas, setCanvas] = useState(null);
   //const [newMessage, setNewMessage] = useState(""); //Removed as per update 4
-  const usersmap = new Map()
+  const usersmap = new Map();
 
   const fetchUsers = async () => {
-    const res = await axios.post(`/api/Room/user`, { roomId: id })
-    setRoomUsers(res.data.users)
-    setMap(res.data.room.Map.image)
-    const currUserSprite = res.data.users.find((u) => u.user.clerkId === currUser.id)
+    const res = await axios.post(`/api/Room/user`, { roomId: id });
+    console.log("Room user data:", res.data);
+    setRoomUsers(res.data.users);
+    setMap(res.data.room.Map.image);
+    const currUserSprite = res.data.users.find(
+      (u) => u.user.email === currUser.emailAddresses[0].emailAddress
+    );
+    console.log("Current user sprite data:", currUserSprite);
 
     setUser({
       ...user,
@@ -45,154 +49,166 @@ export default function Page() {
       name: currUserSprite.user.name,
       spiritImage: currUserSprite.avatar.spiritImage,
       avatarName: currUserSprite.avatar.name,
-    })
+    });
 
     if (currUserSprite) {
-      setSpriteImage(currUserSprite.avatar.spiritImage)
-      console.log("Sprite image", spriteImage)
+      setSpriteImage(currUserSprite.avatar.spiritImage);
+      console.log("Sprite image", spriteImage);
     }
-    setLoading(false)
-  }
+    setLoading(false);
+  };
   useEffect(() => {
     if (isLoaded && isSignedIn) {
-      socket.emit("joinSpace", id, user)
-      console.log("Joining space", id)
-      fetchUsers()
+      socket.emit("joinSpace", id, user);
+      console.log("Joining space", id);
+      fetchUsers();
     }
-  }, [isLoaded, isSignedIn])
+  }, [isLoaded, isSignedIn]);
 
   useEffect(() => {
     socket.on("updateUsers", (users) => {
-      console.log("Updating users", users)
-      console.log(users)
-      setUsers(users)
-    })
+      console.log("Updating users", users);
+      console.log(users);
+      setUsers(users);
+    });
     const handleIncomingMessage = (message) => {
-      setMessages((prevMessages) => [...prevMessages, message])
-    }
+      setMessages((prevMessages) => [...prevMessages, message]);
+    };
 
-    socket.on("message", handleIncomingMessage)
+    socket.on("message", handleIncomingMessage);
     return () => {
-      socket.off("message", handleIncomingMessage)
-    }
-  }, [])
+      socket.off("message", handleIncomingMessage);
+    };
+  }, []);
 
   useEffect(() => {
     if (!loading) {
-      const canvas = canvasRef.current
-      const ctx = canvas.getContext("2d")
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
       setCanvas(canvas);
 
-      const backgroundImg = new Image()
-      backgroundImg.src = map
+      const backgroundImg = new Image();
+      backgroundImg.src = map;
 
-      const spriteImg = new Image()
-      console.log("Sprite image", spriteImage)
-      spriteImg.src = spriteImage
+      const spriteImg = new Image();
+      console.log("Sprite image", spriteImage);
+      spriteImg.src = spriteImage;
 
-      const frameCount = 4
-      const spriteWidth = spriteImg.width / frameCount
-      const spriteHeight = spriteImg.height / 4
+      const frameCount = 4;
+      const spriteWidth = spriteImg.width / frameCount;
+      const spriteHeight = spriteImg.height / 4;
 
       const draw = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-        ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height)
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
 
+        const maxX = canvas.width - 50; // 50 is the width of the sprite
+        const maxY = canvas.height - 50; // 50 is the height of the sprite
 
-        const maxX = canvas.width - 50  // 50 is the width of the sprite
-        const maxY = canvas.height - 50 // 50 is the height of the sprite
-  
         // Apply boundary constraints to user position
-        const userX = Math.max(0, Math.min(user.x, maxX))
-        const userY = Math.max(0, Math.min(user.y, maxY))
+        const userX = Math.max(0, Math.min(user.x, maxX));
+        const userY = Math.max(0, Math.min(user.y, maxY));
         // Draw the current user
-        const directionRow = direction === "down" ? 0 : direction === "left" ? 1 : direction === "right" ? 2 : 3 // 'up'
-        
+        const directionRow =
+          direction === "down"
+            ? 0
+            : direction === "left"
+            ? 1
+            : direction === "right"
+            ? 2
+            : 3; // 'up'
 
         // Draw other users
         users.forEach((otherUser) => {
-          const otherspiritImage = new Image()
-          const userX = Math.max(0, Math.min(otherUser.x, maxX))
-          const userY = Math.max(0, Math.min(otherUser.y, maxY))
-          otherspiritImage.src = otherUser.spiritImage
-            const dir =
-              otherUser.direction === "down"
-                ? 0
-                : otherUser.direction === "left"
-                  ? 1
-                  : otherUser.direction === "right"
-                    ? 2
-                    : 3 // 'up'
-            ctx.drawImage(
-              otherspiritImage,
-              0, // Always the first frame (x = 0)
-              dir * spriteHeight, // Source y position
-              spriteWidth, // Source width
-              spriteHeight, // Source height
-               userX, // Destination x position
-               userY, // Destination y position
-              50, // Destination width
-              50, // Destination height
-            )
-        })
+          const otherspiritImage = new Image();
+          const userX = Math.max(0, Math.min(otherUser.x, maxX));
+          const userY = Math.max(0, Math.min(otherUser.y, maxY));
+          otherspiritImage.src = otherUser.spiritImage;
+          const dir =
+            otherUser.direction === "down"
+              ? 0
+              : otherUser.direction === "left"
+              ? 1
+              : otherUser.direction === "right"
+              ? 2
+              : 3; // 'up'
+          ctx.drawImage(
+            otherspiritImage,
+            0, // Always the first frame (x = 0)
+            dir * spriteHeight, // Source y position
+            spriteWidth, // Source width
+            spriteHeight, // Source height
+            userX, // Destination x position
+            userY, // Destination y position
+            50, // Destination width
+            50 // Destination height
+          );
+        });
 
-        requestAnimationFrame(draw)
-      }
+        requestAnimationFrame(draw);
+      };
 
       const handleSpriteLoad = () => {
-        draw()
-      }
+        draw();
+      };
 
-      spriteImg.onload = handleSpriteLoad
+      spriteImg.onload = handleSpriteLoad;
     }
-  }, [user, direction, users, loading, spriteImage])
+  }, [user, direction, users, loading, spriteImage]);
 
   const sendMessage = (message) => {
-    console.log("Sending message", message, user.name)
-    socket.emit("message", { text: message, user: user.name }, id)
-    setMessages((prevMessages) => [...prevMessages, { text: message, user: user.name }])
-  }
+    console.log("Sending message", message, user.name);
+    socket.emit("message", { text: message, user: user.name }, id);
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { text: message, user: user.name },
+    ]);
+  };
 
   const handleKeyDown = (e) => {
-    const key = e.key
-    let newUser = { ...user }
+    const key = e.key;
+    let newUser = { ...user };
     if (key === "w" || key === "ArrowUp") {
-      newUser = { ...newUser, y: newUser.y - 20, direction: "up" }
+      newUser = { ...newUser, y: newUser.y - 20, direction: "up" };
     } else if (key === "s" || key === "ArrowDown") {
-      newUser = { ...newUser, y: newUser.y + 20, direction: "down" }
+      newUser = { ...newUser, y: newUser.y + 20, direction: "down" };
     } else if (key === "a" || key === "ArrowLeft") {
-      newUser = { ...newUser, x: newUser.x - 20, direction: "left" }
+      newUser = { ...newUser, x: newUser.x - 20, direction: "left" };
     } else if (key === "d" || key === "ArrowRight") {
-      newUser = { ...newUser, x: newUser.x + 20, direction: "right" }
+      newUser = { ...newUser, x: newUser.x + 20, direction: "right" };
     }
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext("2d")
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
-    const maxX = canvas.width-50
-    const maxY = canvas.height -50
-    const userX = Math.max(0, Math.min(newUser.x, maxX))
-    const userY = Math.max(0, Math.min(newUser.y, maxY))
-    newUser.x = userX
-    newUser.y = userY
-    if (userX !== user.x || userY !== user.y || newUser.direction !== user.direction) {
-      setDirection(newUser.direction)
-      setUser(newUser)
-      socket.emit("updateAttributes", id, newUser)
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const maxX = canvas.width - 50;
+    const maxY = canvas.height - 50;
+    const userX = Math.max(0, Math.min(newUser.x, maxX));
+    const userY = Math.max(0, Math.min(newUser.y, maxY));
+    newUser.x = userX;
+    newUser.y = userY;
+    if (
+      userX !== user.x ||
+      userY !== user.y ||
+      newUser.direction !== user.direction
+    ) {
+      setDirection(newUser.direction);
+      setUser(newUser);
+      socket.emit("updateAttributes", id, newUser);
     }
-  }
+  };
 
   useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown)
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
-      window.removeEventListener("keydown", handleKeyDown)
-    }
-  }, [user])
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [user]);
 
   if (!isLoaded || !isSignedIn) {
-    return null
+    return null;
   }
   return (
     <div className="min-h-screen bg-gray-50 w-full flex items-center justify-center">
@@ -202,12 +218,15 @@ export default function Page() {
         </div>
       ) : (
         <>
-          <canvas ref={canvasRef} className="h-full w-full" id="canvas"></canvas>
+          <canvas
+            ref={canvasRef}
+            className="h-full w-full"
+            id="canvas"
+          ></canvas>
           <HamburgerChat messages={messages} sendMessage={sendMessage} />
           <LiveRoom roomId={id} userName={user.name} />
         </>
       )}
     </div>
-  )
+  );
 }
-

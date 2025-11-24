@@ -4,7 +4,7 @@ let socket;
 
 export const getSocket = () => {
   if (!socket) {
-    socket = io("https://vrws-production-ab5a.up.railway.app");
+    socket = io("http://localhost:3000");
   }
   return socket;
 };

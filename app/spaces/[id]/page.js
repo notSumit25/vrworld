@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
 import LiveRoom from "../../components/LiveRoom";
+import ProximityLiveRoom from "../../components/ProximityLiveRoom.jsx";
 import { useUser } from "@clerk/nextjs";
 import HamburgerChat from "../../components/HamburgerChat.jsx";
 
@@ -32,6 +33,14 @@ export default function Page() {
   const [canvas, setCanvas] = useState(null);
   //const [newMessage, setNewMessage] = useState(""); //Removed as per update 4
   const usersmap = new Map();
+
+  // Proximity settings for LiveKit
+  const proximitySettings = {
+    proximityDistance: 150, // pixels
+    maxSubscriptions: 6,
+    updateInterval: 200, // ms
+    spatialAudioEnabled: false, // Enable when you add spatial audio support
+  };
 
   const fetchUsers = async () => {
     const res = await axios.post(`/api/Room/user`, { roomId: id });
@@ -224,7 +233,18 @@ export default function Page() {
             id="canvas"
           ></canvas>
           <HamburgerChat messages={messages} sendMessage={sendMessage} />
-          <LiveRoom roomId={id} userName={user.name} />
+          <ProximityLiveRoom
+            roomId={id}
+            userName={user.name}
+            socket={socket}
+            currentUser={{
+              x: user.x,
+              y: user.y,
+              clerkId: user.clerkId,
+              name: user.name,
+            }}
+            proximitySettings={proximitySettings}
+          />
         </>
       )}
     </div>
